@@ -1,0 +1,19 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "chat para challenger do discord dos javalinos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabrielcfvg/chat.git"
+  },
+  "author": "@biel,@londarks,@ArthurBacci,@Guibaux",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gabrielcfvg/chat/issues"
+  },
+  "homepage": "https://github.com/gabrielcfvg/chat#readme"
+}
