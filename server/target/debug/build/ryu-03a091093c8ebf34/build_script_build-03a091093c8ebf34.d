@@ -1,5 +1,0 @@
-D:\projetos\chat\server\target\debug\build\ryu-03a091093c8ebf34\build_script_build-03a091093c8ebf34.exe: C:\Users\gabriel\.cargo\registry\src\github.com-1ecc6299db9ec823\ryu-1.0.5\build.rs
-
-D:\projetos\chat\server\target\debug\build\ryu-03a091093c8ebf34\build_script_build-03a091093c8ebf34.d: C:\Users\gabriel\.cargo\registry\src\github.com-1ecc6299db9ec823\ryu-1.0.5\build.rs
-
-C:\Users\gabriel\.cargo\registry\src\github.com-1ecc6299db9ec823\ryu-1.0.5\build.rs:
