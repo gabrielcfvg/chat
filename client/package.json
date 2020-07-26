@@ -5,19 +5,36 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"n tem teste nenhum nao kkkkkkkk\" && exit 1"
+    "test": "echo \"n tem teste nenhum nao kkkkkkkk\" && exit 1",
+    "dist": "electron-builder",
+    "pack": "electron-builder --dir"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gabrielcfvg/chat.git"
   },
   "author": "@biel,@londarks,@ArthurBacci,@Guibaux",
-  "license": "GPL",
+  "license": "GPL-2.0",
   "bugs": {
     "url": "https://github.com/gabrielcfvg/chat/issues"
   },
+  "build": {
+    "appId": "chat.boar.com",
+    "win": {
+      "target": [
+        {
+          "target": "nsis-web",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ]
+    }
+  },
   "homepage": "https://github.com/gabrielcfvg/chat#readme",
   "devDependencies": {
-    "electron": "^9.1.1"
+    "electron": "^9.1.1",
+    "electron-builder": "^22.7.0"
   }
 }

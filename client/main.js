@@ -5,7 +5,7 @@ function createWindow() {
         width: 800, // Largura da tela
         height: 600, // Altura da tela
         webPreferences: {
-            nodeIntegration: false // n sei oq e
+            nodeIntegration: false 
         }
     })
     win.loadFile("pages/main.html")
