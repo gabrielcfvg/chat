@@ -8,7 +8,8 @@ function createWindow() {
             nodeIntegration: false 
         }
     })
-    win.loadFile("pages/main.html")
+    win.loadFile("pages/main.html") // Carrega a página
+    win.removeMenu() // Tira o menu superior
 }
 app.whenReady().then(createWindow) // Promessa de criação da tela
 

@@ -1,10 +1,17 @@
-var lastActiveUser = 0
+var activeUser = -1
 
 function selectActiveUser(id) {
+    if (activeUser == -1)
+        document.getElementById("configIcon").classList.remove("active")
+    else
+        document.getElementById("user"+activeUser).classList.remove("active")
+
     activeUser = id;
-    document.getElementById("user"+lastActiveUser).classList.remove("active")
-    document.getElementById("user"+activeUser).classList.add("active")
-    lastActiveUser = id;
+
+    if (activeUser == -1)
+        document.getElementById("configIcon").classList.add("active")
+    else
+        document.getElementById("user"+activeUser).classList.add("active")
 }
 
 var leftMenu = document.getElementById("leftMenu")
