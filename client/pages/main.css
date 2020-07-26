@@ -1,6 +1,7 @@
 :root {
   --c1: #4F4F4F;
   --c2: #383737;
+  --c3: #101010;
 
   --t1: 250ms;
 }
@@ -27,6 +28,8 @@ body {
   top: 0;
   left: 0;
   width: 8vw;
+  min-width: 8vh;
+  max-width: 10vh;
   height: 100vh;
   background-color: var(--c2);
   display: flex;
@@ -37,16 +40,27 @@ body {
 
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
   scrollbar-width: none;  /* Firefox */
+
+  box-shadow: 0.1vw 0 0.5vw var(--c2);
+  transition: box-shadow var(--t1);
 }
 
 #content .left-menu::-webkit-scrollbar { 
   display: none;  /* Safari and Chrome */
 }
 
+#content .left-menu:hover {
+  box-shadow: 0.3vw 0 1vw var(--c2);
+}
+
 
 #content .left-menu .user-icon {
   width: 6vw;
   height: 6vw;
+  min-width: 6vh;
+  min-height: 6vh;
+  max-width: 8vh;
+  max-height: 8vh;
   flex: none;
   overflow: hidden;
   margin-top: 1vh;
@@ -54,11 +68,13 @@ body {
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  transition: border-radius var(--t1);
+  box-shadow: 0 0 1vmin 0.1vmin var(--c3);
+  transition: border-radius var(--t1), box-shadow var(--t1);
 }
 
 #content .left-menu .user-icon.active {
   border-radius: 25%;
+  box-shadow: 0 0 1.5vmin 0.3vmin var(--c3);
 }
 
 #content .left-menu .user-icon img {
