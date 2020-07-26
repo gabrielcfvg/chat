@@ -4,6 +4,7 @@ use serde_json;
 use serde_json::{Value, json};
 use crate::{TypeBatch, TypeRsaPrivate};
 use openssl::rsa::Padding;
+use openssl::base64;
 
 pub fn client(mut conn: TcpStream, id: usize, batch: TypeBatch, addr: SocketAddr, rsa_private: TypeRsaPrivate) -> Result<(), Box<dyn std::error::Error>> {
 
@@ -23,9 +24,12 @@ pub fn client(mut conn: TcpStream, id: usize, batch: TypeBatch, addr: SocketAddr
         let mut mem1 = [0;256];
         let mut mem2 = [0;256];
 
-        //envio da chave RSA pública
-        conn.write(rsa_private.public_key_to_pem()?.as_slice())?;
-        
+
+
+        // envio do pacote com chave pública
+        let chave = rsa_private.public_key_to_pem()?;
+        conn.write(json![{"type": 0, "content": base64::encode_block(&chave)}].to_string().as_bytes())?;
+
         // leitura do pacote de login criptografado
         conn.read(&mut mem1)?;
 
@@ -43,7 +47,7 @@ pub fn client(mut conn: TcpStream, id: usize, batch: TypeBatch, addr: SocketAddr
             nome = pacote["content"]["name"].as_str().unwrap().to_string();
 
             // envio da confirmação de sucesso no login
-            conn.write(json![{"type": 0, "content": 0}].to_string().as_bytes())?;
+            conn.write(json![{"type": 1, "content": 0}].to_string().as_bytes())?;
             
             
             // Como ainda não existe sistema de autenticação,
@@ -74,9 +78,10 @@ pub fn client(mut conn: TcpStream, id: usize, batch: TypeBatch, addr: SocketAddr
             
             match pacote["type"].as_u64().unwrap() {
 
-                1 => {
+                /*
+                2 => {
 
-                        let saida = json![{"type": 1,
+                        let saida = json![{"type": 2
                                            "content": format!("{} from {}!", pacote["content"].as_str().unwrap(), nome)}];
                         let mut vet = vec![];
                         let mut tmp_lock = batch.lock().unwrap();
@@ -90,6 +95,7 @@ pub fn client(mut conn: TcpStream, id: usize, batch: TypeBatch, addr: SocketAddr
                             println!("enviado");
                     }
                 },
+                */
 
                 _ => {}
             }
