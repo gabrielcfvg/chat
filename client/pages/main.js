@@ -1,8 +1,4 @@
 var lastActiveUser = 0
-var activeUser = 0
-
-document.getElementById("user"+lastActiveUser).classList.remove("active")
-document.getElementById("user"+activeUser).classList.add("active")
 
 function selectActiveUser(id) {
     activeUser = id;
@@ -11,3 +7,13 @@ function selectActiveUser(id) {
     lastActiveUser = id;
 }
 
+var leftMenu = document.getElementById("leftMenu")
+
+for (var i = 0; i < 15; i++) {
+    leftMenu.insertAdjacentHTML(
+        "beforeend", 
+        `<div id="user`+
+        i+`" onclick="selectActiveUser(`+
+        i+`)" class="user-icon"><img src="tmp/koala.jpg" alt="Koala"></div>`
+    )
+}
