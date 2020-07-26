@@ -1,14 +1,13 @@
-var vm = new Vue({
-    el: "#content",
-    data: {
-        a: "Hello world"
-    }
-})
+var lastActiveUser = 0
+var activeUser = 0
 
-function setVar(value) {
-    vm.a = value;
+document.getElementById("user"+lastActiveUser).classList.remove("active")
+document.getElementById("user"+activeUser).classList.add("active")
+
+function selectActiveUser(id) {
+    activeUser = id;
+    document.getElementById("user"+lastActiveUser).classList.remove("active")
+    document.getElementById("user"+activeUser).classList.add("active")
+    lastActiveUser = id;
 }
 
-function getVar() {
-    console.log(vm.a)
-}
