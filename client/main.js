@@ -1,20 +1,18 @@
-const { app, BrowserWindow, Notification, globalShortcut } = require("electron")
+const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron")
 
-import { backupMessages } from "./functions";
+const { savePreferences, backupMessages } = require('./functions')
 
-function createWindow() {
-    let win = new BrowserWindow({
+app.whenReady().then(() => {
+    new BrowserWindow({
         width: 800, // Largura da tela
         height: 600, // Altura da tela
         webPreferences: {
             nodeIntegration: false 
         }
     })
-    win.loadFile("pages/main.html") // Carrega a página
-    win.removeMenu() // Tira o menu superior
-}
-app.whenReady().then(() => {
-    createWindow()
+    .loadFile("pages/main.html") // Carrega a página
+    .removeMenu() // Tira o menu superior
+
     globalShortcut.register('CommandOrControl+B', backupMessages) // Faz backup com Ctrl+B
 }) // Promessa de criação da tela
 
@@ -31,3 +29,8 @@ app.on('activate', () => {
         createWindow()
     }
 })
+
+// IPC 
+
+ipcMain.on('save-preferences', savePreferences);
+

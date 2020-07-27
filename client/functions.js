@@ -1,4 +1,17 @@
-// Faz nada por hora, mas a ideia é que ele pegue as mensagens e guarde em um banco sqlite
-export function backupMessages() {
+const fs = require('fs')
+
+exports.backupMessages = () => {
+
+}
+
+exports.login = () => {
     
+}
+
+exports.savePreferences = (event, data) => {
+    
+}
+
+exports.sendMessage = () => {
+
 }
