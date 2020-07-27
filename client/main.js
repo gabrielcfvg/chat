@@ -38,7 +38,7 @@ app.on('activate', () => {
 // #                                                                    #
 // ######################################################################
 
-/*
+
 const storage = require('electron-json-storage');
 
 ipcMain.on('storage-data', (event, arg) => {
@@ -47,7 +47,7 @@ ipcMain.on('storage-data', (event, arg) => {
 
     storage.set(key, value)
 })
-*/
+
 
 
 // ######################################################################
@@ -62,7 +62,7 @@ const crypto = require("crypto");
 
 const encoder = new TextEncoder();
 
-let login = false;
+let login_status = false;
 let socket = new net.Socket();
 
 const PORTA = 1234;
@@ -90,7 +90,7 @@ socket.on('data', data => {
 
     let pacote = JSON.parse(data.toString());
 
-    if (!login) {
+    if (!login_status) {
 
         if (pacote.type === 0) {
 
@@ -118,7 +118,7 @@ socket.on('data', data => {
 
             if (pacote.content === 0) {
                 // significa que o login foi efetuado com sucesso
-                login = true;
+                login_status = true;
 
             }
             else if (pacote.content === 1) {
@@ -151,28 +151,20 @@ function sleep(ms) {
   } 
 
 
-ipcMain.on('synchronous-message', (event, arg) => {
+async function login(event, arg) {
+    dados.name = arg.name;
+    dados.password = arg.password;
+    dados.operation = arg.operation;
 
-    switch (arg.type) {
+    login_ready = false;
+    socket.write('{"type": 2}');
 
-        case (0): {
-
-            dados.name = arg.name;
-            dados.password = arg.password;
-            dados.operation = arg.operation;
-
-            login_ready = false;
-            socket.write('{"type": 2}');
-
-            while (!login_ready) {
-                sleep(100);
-                console.log("ciclo de sleep")
-            }
-
-            event.returnValue = login_res;
-        }
-
+    while (!login_ready) {
+        await sleep(100);
+        console.log("ciclo de sleep") // debug
     }
 
+    event.returnValue = login_res;
+}
 
-});
+ipcMain.on('login', login);
