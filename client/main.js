@@ -1,6 +1,6 @@
-const { app, BrowserWindow, Notification, globalShortcut } = require("electron")
+const { app, BrowserWindow, Notification, globalShortcut, ipcMain } = require("electron")
 
-import { backupMessages } from "./functions";
+//import { backupMessages } from "./functions";
 
 function createWindow() {
     let win = new BrowserWindow({
@@ -31,3 +31,148 @@ app.on('activate', () => {
         createWindow()
     }
 })
+
+// ######################################################################
+// #                                                                    #
+// #                         ARMANEZAMENTO                              #
+// #                                                                    #
+// ######################################################################
+
+/*
+const storage = require('electron-json-storage');
+
+ipcMain.on('storage-data', (event, arg) => {
+    var key = arg.key
+    var value = arg.value
+
+    storage.set(key, value)
+})
+*/
+
+
+// ######################################################################
+// #                                                                    #
+// #                              REDES                                 #
+// #                                                                    #
+// ######################################################################
+
+
+const net = require("net");
+const crypto = require("crypto");
+
+const encoder = new TextEncoder();
+
+let login = false;
+let socket = new net.Socket();
+
+const PORTA = 1234;
+const IP = "127.0.0.1";
+var dados = {
+    name: "teste",
+    password: "senha",
+    operation: 0
+}
+
+let login_ready = false;
+let login_res;
+
+
+socket.connect({host: IP, port: PORTA}, () => {
+    console.log("conectado com sucesso!!!");
+    //socket.write('{"type": 2}');
+});
+
+socket.on('data', data => {
+
+    if (!data){
+        return;
+    }
+
+    let pacote = JSON.parse(data.toString());
+
+    if (!login) {
+
+        if (pacote.type === 0) {
+
+            // decodificação da chave pública de bae64 pra bytes
+            let chave = new Buffer.from(pacote.content, "base64").toString();
+            
+            // criação do pacote a ser enviado para o servidor
+            let saida = {
+                type: 0,
+                content: {
+                    name: dados.name,
+                    password: dados.password,
+                    operation: dados.operation
+                }
+            };
+
+            // transformação do pacote em uma string JSON
+            saida = encoder.encode(JSON.stringify(saida));
+
+            // envio do pacote para o servidor
+            socket.write(crypto.publicEncrypt({key: chave, padding: crypto.constants.RSA_PKCS1_PADDING}, saida));
+
+        }
+        else if (pacote.type === 1) {
+
+            if (pacote.content === 0) {
+                // significa que o login foi efetuado com sucesso
+                login = true;
+
+            }
+            else if (pacote.content === 1) {
+                // significa que o usuário existe, mas a senha está incorreta
+
+            }
+            else if (pacote.content === 2) {
+                // significa que não existe nenhum usuário com esse nome
+
+            }
+            else if (pacote.content === 3) {
+                // significa que o registo foi realizado com sucesso
+
+            }
+            else if (pacote.content === 4) {
+                // significa que o nome já está em uso, e não pode ser registrado
+
+            }
+            console.log(">>>" + pacote.content.toString());
+
+        }
+    }
+
+});
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  } 
+
+
+ipcMain.on('synchronous-message', (event, arg) => {
+
+    switch (arg.type) {
+
+        case (0): {
+
+            dados.name = arg.name;
+            dados.password = arg.password;
+            dados.operation = arg.operation;
+
+            login_ready = false;
+            socket.write('{"type": 2}');
+
+            while (!login_ready) {
+                sleep(100);
+                console.log("ciclo de sleep")
+            }
+
+            event.returnValue = login_res;
+        }
+
+    }
+
+
+});
