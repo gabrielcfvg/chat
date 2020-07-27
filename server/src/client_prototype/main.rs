@@ -1,29 +1,39 @@
 use std::net::TcpStream;
 use std::io::{Write, Read};
 use openssl::rsa::{Rsa, Padding};
+use openssl::base64;
 use serde_json::{Value, json};
 
 fn receiver(mut socket: TcpStream, name: String) -> Result<(), Box<dyn std::error::Error>>{
 
-    //let mut mem = [0; 2048];
+    let mut mem;
 
     //###################//
     //       login       //
     //###################//
 
     loop {
-        
-        let mut mem_chave = [0; 451];
+
+        mem = [0; 2048];
+        let chave: Vec<u8>;
         let mut mem2 = [0; 256];
 
         //recebimento da chave pública RSA
-        socket.read(&mut mem_chave).unwrap();
+        socket.read(&mut mem).unwrap();
+        let pacote: Value = serde_json::from_str(String::from_utf8_lossy(&mem).trim_matches('\0').trim()).unwrap();
+        if pacote["type"].as_u64().unwrap() == 0 {
+            chave = base64::decode_block(pacote["content"].as_str().unwrap()).unwrap();
+        }
+        else {
+            continue;
+        }
+
 
         //criação e transformação em bytes do pacote de login
         let pacote_login = json![{"type": 0, "content": {"name": name}}].to_string().into_bytes();
 
         // encriptação de pacote com RSA
-        let rsa = Rsa::public_key_from_pem(&mem_chave).unwrap();
+        let rsa = Rsa::public_key_from_pem(&chave).unwrap();
         rsa.public_encrypt(pacote_login.as_slice(), &mut mem2, Padding::PKCS1).unwrap();
         
         // envio do pacote criptografado
@@ -40,7 +50,7 @@ fn receiver(mut socket: TcpStream, name: String) -> Result<(), Box<dyn std::erro
         //no futuro será adicionado um número pra cada tipo de erro: conta não existente, senha incorreta, nome já em uso, etc
 
         let pacote: Value = serde_json::from_str(String::from_utf8_lossy(&mem2).trim_matches('\0').trim()).unwrap();
-        if pacote["type"].as_u64().expect("1") == 0 && pacote["content"].as_u64().expect("2") == 0 {
+        if pacote["type"].as_u64().expect("1") == 1 && pacote["content"].as_u64().expect("2") == 0 {
             break;
         }
     }

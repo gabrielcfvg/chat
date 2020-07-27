@@ -1,4 +1,6 @@
-const { app, BrowserWindow } = require("electron")
+const { app, BrowserWindow, Notification, globalShortcut } = require("electron")
+
+import { backupMessages } from "./functions";
 
 function createWindow() {
     let win = new BrowserWindow({
@@ -11,7 +13,10 @@ function createWindow() {
     win.loadFile("pages/main.html") // Carrega a página
     win.removeMenu() // Tira o menu superior
 }
-app.whenReady().then(createWindow) // Promessa de criação da tela
+app.whenReady().then(() => {
+    createWindow()
+    globalShortcut.register('CommandOrControl+B', backupMessages) // Faz backup com Ctrl+B
+}) // Promessa de criação da tela
 
 app.on('window-all-closed', () => {
     // MacOS é estranho

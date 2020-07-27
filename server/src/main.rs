@@ -1,6 +1,7 @@
 mod client;
 use client::client;
 
+mod database;
 
 use std::net::{TcpStream, TcpListener, SocketAddr};
 use std::thread;
