@@ -1,23 +1,38 @@
 use std::path::Path;
 use std::io::ErrorKind;
-use serde_json::{Value, json};
+use serde_json::{Value};
 
 use rusqlite;
 
 
-enum ProfileSelect {
+pub enum ProfileSelect {
     by_ID(i32),
     by_name(String)
 }
 
 #[allow(non_camel_case_types)]
-struct Profile_API {
+pub struct Profile_API {
     conexao: rusqlite::Connection
 }
 
 impl Profile_API {
 
-    
+    pub fn new_in_memory() -> Result<Self, Box<dyn std::error::Error>> {
+        let conexao = rusqlite::Connection::open_in_memory()?;
+       
+        conexao.execute("CREATE TABLE profiles (
+            id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+            name           TEXT NOT NULL UNIQUE,
+            hash            TEXT NOT NULL,
+            servers         TEXT,
+            contacts        TEXT
+            )", rusqlite::params![]).unwrap();
+
+        Ok(Profile_API {
+            conexao
+        })
+    }
+
     pub fn new(path: &str) -> Result<Self, ErrorKind> {
 
         let path = Path::new(path);
@@ -30,13 +45,14 @@ impl Profile_API {
             conexao = rusqlite::Connection::open(path).unwrap();
         }
 
-        conexao.execute("CREATE TABLE message (
-            id              INTEGER PRIMARY KEY,
-            autor           TEXT NOT NULL,
+        conexao.execute("CREATE TABLE profiles (
+            id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+            name            TEXT NOT NULL UNIQUE,
+            hash            TEXT NOT NULL,
             servers         TEXT,
             contacts        TEXT
             )", rusqlite::params![]).unwrap();
-
+        println!("database ready");
         Ok(Profile_API {
             conexao
         })
@@ -53,26 +69,43 @@ impl Profile_API {
 
     pub fn select_profile(&mut self, arg: ProfileSelect) -> rusqlite::Result<Option<Profile>> {
 
-        let mut query: &str;
+        let query: String;
 
         match arg {
             ProfileSelect::by_ID(id) => {
-                query = format!("SELECT id, autor, servers, contacts FROM profiles WHERE id = {}", id);
+                query = format!(r#"SELECT id, name, hash, servers, contacts FROM profiles WHERE id = "{}""#, id);
             },
             ProfileSelect::by_name(name) => {
-                query = format!("SELECT id, autor, servers, contacts FROM profiles WHERE name = {}", name);
+                query = format!(r#"SELECT id, name, hash, servers, contacts FROM profiles WHERE name = "{}""#, name);
             }
         }
 
-        let query = self.conexao.prepare(query).unwrap()
-                        .query_map(rusqlite::params![], |row| {
-                            Ok(RawProfile::new(&row)?)
-                        }).unwrap();
+        let prepate = self.conexao.prepare(&query);
 
-        let query: Vec<Profile> = query.map(|x| x.unwrap().to_profile()).collect();
+        if let Err(error) = prepate {
 
-        if query.len() >= 1 {
-            return Ok(Some(query[0]));
+            match error {
+                rusqlite::Error::SqliteFailure(code, txt) => {
+                    if txt.clone().unwrap().starts_with("no such column") {
+                        return Ok(None);
+                    }
+                    else {
+                        return Err(rusqlite::Error::SqliteFailure(code, txt));
+                    }
+                },
+                _ => {return Err(error)}
+            }
+        }
+
+        let mut prepate = prepate.unwrap();
+        let res = prepate.query_map(rusqlite::params![], |row| {
+            Ok(Profile::new(&row)?)
+        });
+
+        let profiles: Vec<Profile> = res.unwrap().map(|x| x.unwrap()).collect();
+
+        if profiles.len() >= 1 {
+            return Ok(Some(profiles[0].clone()));
         }
         else {
             return Ok(None);
@@ -81,56 +114,58 @@ impl Profile_API {
 
     }
 
-}
+    pub fn insert_profile(&mut self, profile: Profile) -> rusqlite::Result<()> {
+        
+        let servers = serde_json::to_string(&profile.servers).unwrap();
+        let contacts = serde_json::to_string(&profile.contacts).unwrap();
 
-
-
-struct RawProfile {
-    ID: i32,
-    name: String,
-    servers: String,
-    contacts: String
-}
-
-impl RawProfile {
-
-    pub fn new(row: &rusqlite::Row) -> rusqlite::Result<Self> {
-
-        Ok(RawProfile {
-            ID: row.get(0)?,
-            name: row.get(1)?,
-            servers: row.get(2)?,
-            contacts: row.get(3)?
-        })
+        let tm = std::time::Instant::now();
+        self.conexao.execute("INSERT INTO profiles (name, hash, servers, contacts) VALUES (?1, ?2,?3, ?4)", 
+                             rusqlite::params![profile.name, profile.hash, servers, contacts]
+                            ).unwrap();
+        println!("TEMPO: {}", tm.elapsed().as_micros());
+        
+        
+        
+        Ok(())
     }
-    pub fn to_profile(&self) -> Profile {
-        Profile::new_from_raw_profile(self)
-    }
+
 }
 
 
-struct Profile {
-    ID: i32,
-    name: String,
-    servers: Vec<i32>,
-    contacts: Vec<i32>
+#[derive(Debug, Clone)]
+pub struct Profile {
+    
+    #[allow(non_snake_case)]
+    pub ID: i32,
+    
+    pub name: String,
+    pub hash: String,
+    pub servers: Vec<i32>,
+    pub contacts: Vec<i32>
 }
 
 impl Profile {
 
-    pub fn new_from_raw_profile(raw: &RawProfile) -> Self {
+    pub fn new(row: &rusqlite::Row) -> rusqlite::Result<Self> {
         
-        let servers: Value = serde_json::from_str(&raw.servers).unwrap();
+        let servers: String = row.get(3)?;
+        let contacts: String = row.get(4)?;
+
+        let servers: Value = serde_json::from_str(servers.as_str()).unwrap();
         let servers: Vec<i32> = servers.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as i32).collect();
 
-        let contacts: Value = serde_json::from_str(&raw.contacts).unwrap();
+        let contacts: Value = serde_json::from_str(contacts.as_str()).unwrap();
         let contacts: Vec<i32> = contacts.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as i32).collect();
         
-        Profile {
-            ID: raw.ID,
-            name: raw.name.clone(),
+        
+        Ok(Profile {
+            ID: row.get(0)?,
+            name: row.get(1)?,
+            hash: row.get(2)?,
             servers,
             contacts
-        }
+        })
     }
+    
 }

@@ -10,14 +10,17 @@ use std::collections::HashMap;
 use clap::{App, Arg};
 use openssl::rsa::Rsa;
 use openssl::pkey::Private;
+use lazy_static::lazy_static;
 
 type TypeBatch = Arc<Mutex<HashMap<usize, (TcpStream, SocketAddr)>>>;
 type TypeRsaPrivate = Arc<Rsa<Private>>;
 
+lazy_static!{
+    pub static ref DATABASE_CON: Arc<Mutex<database::Profile_API>> = Arc::new(Mutex::new(database::Profile_API::open("teste.db").unwrap()));
+}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
-    
     let args = App::new("Chat server")
                         .about("https://github.com/gabrielcfvg/chat")
                         .arg(Arg::with_name("port")
@@ -55,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         thread::spawn(move || {
 
             match client(stream, num, tbatch1, addr, rsa_private_obj) {
-                Err(erro) => {println!("{} => {}", num, erro)},
+                Err(erro) => {println!("{} => {:?}", num, erro)},
                 _ => {}
             }
 
