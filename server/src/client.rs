@@ -19,6 +19,16 @@ pub fn client(mut conn: TcpStream, _id: usize, _batch: TypeBatch, addr: SocketAd
     
     loop {
         
+        loop {
+            let mut mem = [0; 1024];
+            conn.read(&mut mem)?;
+            let pacote: Value = serde_json::from_str(String::from_utf8_lossy(&mem).trim_matches('\0').trim())?;
+            if pacote["type"].as_u64().unwrap() == 2 {
+                break;
+            }
+
+        }
+
 
         // são necessárias 2 memórias por conta das funções de decriptação,
         // pois não é possivel ler e depois escrever na mesma memória,
@@ -102,50 +112,6 @@ pub fn client(mut conn: TcpStream, _id: usize, _batch: TypeBatch, addr: SocketAd
     }
 
     println!("client ({} {}) logado como {}", addr.ip(), addr.port(), nome);
-
-
-    // loop principal 
-    loop {
-
-        // limpeza de memoria
-        let mut mem = [0; 1024];
-
-        // leitura do pacote para a memória
-        conn.read(&mut mem)?;
-
-        for com in String::from_utf8_lossy(&mem).trim_matches('\0').trim().split("|") {
-        
-
-            let pacote: Value = serde_json::from_str(com).unwrap();
-
-            // Parseamento e execução das requisições
-            // Ganhará uma função própria em breve
-            
-            match pacote["type"].as_u64().unwrap() {
-
-                /*
-                2 => {
-
-                        let saida = json![{"type": 2
-                                           "content": format!("{} from {}!", pacote["content"].as_str().unwrap(), nome)}];
-                        let mut vet = vec![];
-                        let mut tmp_lock = batch.lock().unwrap();
-                        for (&key, _) in tmp_lock.iter() {
-                            if key != id {
-                                vet.push(key);
-                            }
-                        }
-                        for a in vet {
-                            tmp_lock.get_mut(&a).unwrap().0.write(saida.to_string().as_bytes())?;
-                            println!("enviado");
-                    }
-                },
-                */
-
-                _ => {}
-            }
-        }
-    } 
-
+    Ok(())
 
 }
