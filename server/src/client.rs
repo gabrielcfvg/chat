@@ -6,7 +6,7 @@ use crate::{TypeBatch, TypeRsaPrivate};
 use openssl::rsa::Padding;
 use openssl::base64;
 
-pub fn client(mut conn: TcpStream, id: usize, batch: TypeBatch, addr: SocketAddr, rsa_private: TypeRsaPrivate) -> Result<(), Box<dyn std::error::Error>> {
+pub fn client(mut conn: TcpStream, _id: usize, _batch: TypeBatch, addr: SocketAddr, rsa_private: TypeRsaPrivate) -> Result<(), Box<dyn std::error::Error>> {
 
     let nome: String;
 
