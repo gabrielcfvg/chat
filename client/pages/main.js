@@ -29,7 +29,7 @@ function selectActive(type, id) {
         configIcon.classList.add("active")
     else if (activeType === "user")
         document.getElementById("user" + active).classList.add("active")
-    
+
 
     if (activeType === "none")
         rightSide.innerHTML = `<h1 class="ns">Você não selecionou nenhum chat</h1>
@@ -93,14 +93,14 @@ async function toggleList() {
     } else if (listing == 2) {
         listMessages()
     }
-    var sleepTime = time1/90
-    for (var i = 0; i < 361; i+=4) {
+    var sleepTime = time1 / 90
+    for (var i = 0; i < 361; i += 4) {
         if (i >= 360) {
             i = 0;
-            alternateIcon.style.transform = "rotate("+i+"deg)"
+            alternateIcon.style.transform = "rotate(" + i + "deg)"
             break
         }
-        alternateIcon.style.transform = "rotate("+i+"deg)"
+        alternateIcon.style.transform = "rotate(" + i + "deg)"
         await new Promise(r => setTimeout(r, sleepTime))
     }
 }
