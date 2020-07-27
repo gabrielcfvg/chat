@@ -1,8 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 :root {
-    --c1: #4F4F4F;
-    --c2: #383737;
-    --c3: #262626;
-    --c4: #101010;
+    --c1: #2F2F2F;
+    --c2: #282727;
+    --c3: #161616;
+    --c4: #050505;
+    --cl1: #eeeeee;
+    --cl2: #bbbbbb;
+    --cl3: #999999;
     --t1: 250ms;
 }
 
@@ -19,7 +23,7 @@
     position: relative;
 }
 
-#content .left-menu {
+#content #leftMenu {
     position: absolute;
     top: 0;
     left: 0;
@@ -40,15 +44,15 @@
     transition: box-shadow var(--t1);
 }
 
-#content .left-menu::-webkit-scrollbar {
+#content #leftMenu::-webkit-scrollbar {
     display: none;
 }
 
-#content .left-menu:hover {
+#content #leftMenu:hover {
     box-shadow: 0.3vw 0 1vw var(--c2);
 }
 
-#content .left-menu .user-icon {
+#content #leftMenu .user-icon {
     width: 6vw;
     height: 6vw;
     min-width: 6vh;
@@ -66,17 +70,17 @@
     transition: border-radius var(--t1), box-shadow var(--t1);
 }
 
-#content .left-menu .user-icon.active {
+#content #leftMenu .user-icon.active {
     border-radius: 25%;
     box-shadow: 0 0 1.5vmin 0.1vmin var(--c4);
 }
 
-#content .left-menu .user-icon img {
+#content #leftMenu .user-icon img {
     width: 100%;
     height: 100%;
 }
 
-#content .top-menu {
+#content #topMenu {
     position: absolute;
     top: 0;
     right: 0;
@@ -86,6 +90,35 @@
     height: 5vh;
     min-height: 2vw;
     max-height: 10vw;
-    background-color: var(--c3);
+    background-color: var(--c2);
     z-index: 10;
+}
+
+#content #rightSide {
+    background: none;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 92vw;
+    min-width: calc(100vw - 10vh);
+    max-width: calc(100vw - 8vh);
+    height: 95vh;
+    min-height: calc(100vh - 2vw);
+    max-height: calc(100vh - 10vw);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#content #rightSide h1.ns {
+    font-size: 5vmin;
+    color: var(--cl1);
+    font-family: "Montserrat";
+}
+
+#content #rightSide h2.ns {
+    font-size: 3vmin;
+    color: var(--cl3);
+    font-family: "Montserrat";
 }
