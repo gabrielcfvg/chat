@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron")
 
-const { savePreferences, backupMessages } = require('./functions')
+const { savePreferences, backupMessages, viewed } = require('./functions')
 
 const storage = require('electron-json-storage')
 app.whenReady().then(() => {
@@ -42,10 +42,11 @@ ipcMain.on('storage-data', (event, arg) => {
     storage.set(arg.key, arg.value)
 })
 
-ipcMain.on('try-login', (event, arg) => {
+ipcMain.on('try-connect', (event, arg) => {
     event.returnValue = login_err
 })
 
+ipcMain.on('viewed', viewed)
 
 // ######################################################################
 // #                                                                    #
@@ -83,7 +84,6 @@ socket.connect({host: IP, port: PORTA}, () => {
 
 socket.on('error', () => {
     login_err = true
-    console.log('errao', login_err)
 }) 
 
 socket.on('data', data => {

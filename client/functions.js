@@ -14,3 +14,7 @@ exports.savePreferences = (event, data) => {
 
 exports.sendMessage = () => {
 }
+
+exports.viewed = () => {
+
+}
