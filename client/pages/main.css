@@ -7,6 +7,8 @@
     --cl1: #eeeeee;
     --cl2: #bbbbbb;
     --cl3: #999999;
+    --cc1: #6780D8;
+    --cc2: #5270C5;
     --t1: 250ms;
 }
 
@@ -132,7 +134,8 @@
     justify-content: center;
 }
 
-#content #formBox #nickname, #content #formBox #password {
+#nickname, #password {
+    position: relative;
     width: 40%;
     height: 5vh;
     outline: none;
@@ -146,6 +149,23 @@
     font-family: "Montserrat";
 }
 
+#nickname-border, #password-border {
+    content: "";
+    width: 0%;
+    margin-left: calc(-40% + 2.5vh);
+    height: 2px;
+    background-color: var(--cc2);
+    margin-top: calc(-2vh - 2px);
+    margin-bottom: calc(2vh + 2px);
+    z-index: 1;
+    transition: width var(--t1), margin-left var(--t1);
+}
+
+#nickname:focus ~ #nickname-border, #password:focus ~ #password-border {
+    width: calc(40% - 2.5vh);
+    margin-left: 0;
+}
+
 #formBox label {
     width: 40%;
     height: 2vh;
@@ -156,3 +176,23 @@
     font-size: 2.5vh;
 }
 
+#formBox #logar {
+    width: 30%;
+    height: 5vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5vh;
+    font-family: "Montserrat";
+    outline: none;
+    background-color: var(--cc1);
+    color: var(--c4);
+    border: none;
+    border-radius: 2.5vh;
+    margin: 2vh 0;
+    font-weight: 500;
+}
+
+#formBox #logar:hover {
+    background-color: var(--cc2);
+}
