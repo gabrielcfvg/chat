@@ -139,9 +139,8 @@
     width: 40%;
     height: 5vh;
     outline: none;
-    border-radius: 2.5vh;
     border: none;
-    background-color: var(--c3);
+    background-color: var(--c2);
     padding: 0 5vh;
     font-size: 2.5vh;
     color: var(--cl1);
@@ -150,9 +149,8 @@
 }
 
 #nickname-border, #password-border {
-    content: "";
     width: 0%;
-    margin-left: calc(-40% + 2.5vh);
+    margin-left: calc(-40%);
     height: 2px;
     background-color: var(--cc2);
     margin-top: calc(-2vh - 2px);
@@ -162,7 +160,7 @@
 }
 
 #nickname:focus ~ #nickname-border, #password:focus ~ #password-border {
-    width: calc(40% - 2.5vh);
+    width: 40%;
     margin-left: 0;
 }
 
@@ -174,6 +172,10 @@
     align-items: center;
     font-family: "Montserrat";
     font-size: 2.5vh;
+    transform: translate(5vh, 5.5vh);
+    z-index: 1;
+    cursor: text;
+    transition: transform var(--t1);
 }
 
 #formBox #logar {
