@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron')
+const fs = require("fs")
 const label = [document.getElementById("nicknameLabel"), document.getElementById("passwordLabel")]
 const input = [document.getElementById("nickname"), document.getElementById("password")]
 const error = [document.getElementById("nicknameError"), document.getElementById("passwordError")]
@@ -16,6 +17,13 @@ function labelBlur(id) {
 }
 
 function logIn() {
+    if (!(fs.existsSync("data/user.json"))) {
+        fs.open("data/user.json", "w", function() {});
+    }
+    fs.writeFile("data/user.json", JSON.stringify({
+        name: input[0].value,
+        password: input[1].value
+    }), function(){});
     returnValue = ipcRenderer.sendSync("login", {
         name: input[0].value,
         password: input[1].value,
@@ -41,5 +49,7 @@ function logIn() {
 function noVisible(id) {
     error[id].classList.remove("visible");
 }
+
+
 
 

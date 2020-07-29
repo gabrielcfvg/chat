@@ -134,7 +134,7 @@
     justify-content: center;
 }
 
-#nickname, #password {
+#nickname, #password, #passwordConfirm {
     position: relative;
     width: 40%;
     height: 5vh;
@@ -148,7 +148,7 @@
     font-family: "Montserrat";
 }
 
-#nickname-border, #password-border {
+#nickname-border, #password-border, #passwordConfirm-border { /* TODO: change to camel case */
     width: 0%;
     margin-left: calc(-40%);
     height: 2px;
@@ -159,7 +159,7 @@
     transition: width var(--t1), margin-left var(--t1);
 }
 
-#nickname:focus ~ #nickname-border, #password:focus ~ #password-border {
+#nickname:focus ~ #nickname-border, #password:focus ~ #password-border, #passwordConfirm:focus ~ #passwordConfirm-border {
     width: 40%;
     margin-left: 0;
 }
@@ -199,7 +199,7 @@
     background-color: var(--cc2);
 }
 
-#nicknameError, #passwordError {
+#nicknameError, #passwordError, #passwordConfirmError {
     font-family: "Montserrat";
     font-size: 2.5vmin;
     color: red;
@@ -213,7 +213,7 @@
     transition: height var(--t1), margin var(--t1);
 }
 
-#nicknameError.visible, #passwordError.visible {
+#nicknameError.visible, #passwordError.visible, #passwordConfirmError.visible {
     height: 3vh;
     margin: 1vh 0;
 }
