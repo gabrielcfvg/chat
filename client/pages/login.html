@@ -13,10 +13,12 @@
             <label for="nickname" id="nicknameLabel">Nome de usuário</label>
             <input type="text" id="nickname" onfocus="labelFocus(0)" onblur="labelBlur(0)">
             <span id="nickname-border"></span>
+            <span id="nicknameError" onclick="noVisible(0)">Erro relativo ao nome de usuário</span>
 
             <label for="password" id="passwordLabel">Senha</label>
             <input type="password" id="password" onfocus="labelFocus(1)" onblur="labelBlur(1)">
             <span id="password-border"></span>
+            <span id="passwordError" onclick="noVisible(1)">Erro relativo à senha</span>
             
             <input type="submit" value="Logar-se" id="logar" onclick="logIn()">
         </div>

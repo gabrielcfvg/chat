@@ -198,3 +198,22 @@
 #formBox #logar:hover {
     background-color: var(--cc2);
 }
+
+#nicknameError, #passwordError {
+    font-family: "Montserrat";
+    font-size: 2.5vmin;
+    color: red;
+    height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    cursor: pointer;
+    transition: height var(--t1), margin var(--t1);
+}
+
+#nicknameError.visible, #passwordError.visible {
+    height: 3vh;
+    margin: 1vh 0;
+}
