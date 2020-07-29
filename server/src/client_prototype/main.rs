@@ -4,9 +4,26 @@ use openssl::rsa::{Rsa, Padding};
 use openssl::base64;
 use serde_json::{Value, json};
 
-fn receiver(mut socket: TcpStream, name: String, senha: String) -> Result<(), Box<dyn std::error::Error>> {
 
-    let mut mem;
+pub fn bytes_to_string(bytes: &[u8]) -> String {
+    return String::from_utf8_lossy(bytes).trim_matches('\0').trim().to_string();
+}
+
+pub fn json_to_string(data: Value) -> String {
+    return data.to_string() + "|";
+}
+pub fn json_to_bytes(data: Value) -> Vec<u8> {
+    return json_to_string(data).as_bytes().to_vec();
+}
+
+
+
+
+fn receiver(mut socket: TcpStream, name: String, senha: String, operation: u32) -> Result<(), Box<dyn std::error::Error>> {
+
+    let mut mem: [u8; 2048];
+    let mut data: String;
+    let mut value_json: Value;
 
     //###################//
     //       login       //
@@ -34,7 +51,7 @@ fn receiver(mut socket: TcpStream, name: String, senha: String) -> Result<(), Bo
 
 
         //criação e transformação em bytes do pacote de login
-        let pacote_login = json![{"type": 0, "content": {"name": name, "password": senha, "operation": 0}}].to_string().into_bytes();
+        let pacote_login = json![{"type": 0, "content": {"name": name, "password": senha, "operation": operation}}].to_string().into_bytes();
 
         // encriptação de pacote com RSA
         let rsa = Rsa::public_key_from_pem(&chave)?;
@@ -61,7 +78,38 @@ fn receiver(mut socket: TcpStream, name: String, senha: String) -> Result<(), Bo
     }
 
     println!("conectado com sucesso como {}!!!", name);
-    return Ok(());
+
+    socket.write(&json_to_bytes(json![{"type": 20, "content": 0}]))?;
+    
+    loop {
+
+        mem = [0; 2048];
+        socket.read(&mut mem)?;
+        data = bytes_to_string(&mem);
+
+        for pacote in data.split("|") {
+
+            if !(pacote.len() > 0) {
+                continue;
+            }
+
+            value_json = serde_json::from_str(pacote).unwrap();
+
+            match value_json["type"].as_u64().unwrap() {
+
+                10 => {
+
+                    let autor = value_json["content"]["autor"].to_string();
+                    let message = value_json["content"]["message"].to_string();
+
+                    println!("\nautor: {}, mensagem: {}", autor, message);
+
+                }
+                _ => ()
+            }
+        }
+    }
+
 }
 
 
@@ -73,6 +121,7 @@ fn main() {
     
     let mut name = String::new();
     let mut senha = String::new();
+    let mut operation = String::new();
 
     print!("nome: ");
     std::io::stdout().flush().unwrap();
@@ -84,22 +133,36 @@ fn main() {
     std::io::stdin().read_line(&mut senha).unwrap();
     senha = senha.trim().to_string();
 
+    print!("operação: ");
+    std::io::stdout().flush().unwrap();
+    std::io::stdin().read_line(&mut operation).unwrap();
+    let mut operation: u32 = operation.trim().parse().unwrap();
+
+
     //std::process::exit(0);
 
     let socket = TcpStream::connect(ADDR).expect("erro ao conectar");
 
-    let _writer = socket.try_clone().unwrap();
+    let mut writer = socket.try_clone().unwrap();
     let reader = socket.try_clone().unwrap();
 
-    std::thread::spawn(|| {
+    std::thread::spawn(move || {
 
-        if let Err(error) = receiver(reader, name, senha) {
+        if let Err(error) = receiver(reader, name, senha, operation) {
             println!("erro: {}", error);
         }
 
     });
 
-    #[allow(deprecated)]
-    std::thread::sleep_ms(1000000);
+    
+    loop {
 
+        let mut message: String = String::new();
+
+        std::io::stdin().read_line(&mut message).unwrap();
+
+        writer.write(&json_to_bytes(json![{"type": 10, "content": {"channel": 0, "message": message.trim()}}])).unwrap();
+
+
+    }
 }

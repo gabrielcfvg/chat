@@ -2,9 +2,11 @@ use std::path::Path;
 use std::io::ErrorKind;
 use serde_json::{Value};
 
+use crate::profile::Profile;
+
 use rusqlite;
 
-
+#[allow(non_camel_case_types)]
 pub enum ProfileSelect {
     by_ID(i32),
     by_name(String)
@@ -52,8 +54,8 @@ impl Profile_API {
             servers         TEXT,
             contacts        TEXT
             )", rusqlite::params![]).unwrap();
-        println!("database ready");
-        Ok(Profile_API {
+        
+            Ok(Profile_API {
             conexao
         })
     }
@@ -99,7 +101,7 @@ impl Profile_API {
 
         let mut prepate = prepate.unwrap();
         let res = prepate.query_map(rusqlite::params![], |row| {
-            Ok(Profile::new(&row)?)
+            Ok(Profile::new_from_database(&row)?)
         });
 
         let profiles: Vec<Profile> = res.unwrap().map(|x| x.unwrap()).collect();
@@ -130,42 +132,4 @@ impl Profile_API {
         Ok(())
     }
 
-}
-
-
-#[derive(Debug, Clone)]
-pub struct Profile {
-    
-    #[allow(non_snake_case)]
-    pub ID: i32,
-    
-    pub name: String,
-    pub hash: String,
-    pub servers: Vec<i32>,
-    pub contacts: Vec<i32>
-}
-
-impl Profile {
-
-    pub fn new(row: &rusqlite::Row) -> rusqlite::Result<Self> {
-        
-        let servers: String = row.get(3)?;
-        let contacts: String = row.get(4)?;
-
-        let servers: Value = serde_json::from_str(servers.as_str()).unwrap();
-        let servers: Vec<i32> = servers.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as i32).collect();
-
-        let contacts: Value = serde_json::from_str(contacts.as_str()).unwrap();
-        let contacts: Vec<i32> = contacts.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as i32).collect();
-        
-        
-        Ok(Profile {
-            ID: row.get(0)?,
-            name: row.get(1)?,
-            hash: row.get(2)?,
-            servers,
-            contacts
-        })
-    }
-    
 }

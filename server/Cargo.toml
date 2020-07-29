@@ -14,6 +14,10 @@ path = "src/main.rs"
 name = "client_prototype"
 path = "src/client_prototype/main.rs"
 
+[[bin]]
+name = "test_main"
+path = "src/test_main.rs"
+
 [dependencies]
 serde_json = "1.0.56"
 clap = "2.33.1"

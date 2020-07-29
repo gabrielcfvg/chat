@@ -1,0 +1,27 @@
+cada um dos protocolos pode ter dois propositos diferentes:
+quando vai do servidor ao client, e quando vai do client ao servidor.
+
+0 - S > C
+envio da chave RSA publica para o client
+tem um campo 'content' com a chave codificada em base64
+
+0 - C > S
+pacote de resposta ao servidor com dados de login,
+dentro do campo 'content' existe um campo 'name', 'password' e 'operation'.
+
+1 S > C
+pacote de resposta ao client com o resultado da tentativa de login
+possue um campo 'content' com atualmente 5 valores possiveis:
+0 -> login realizado com sucesso
+1 -> senha incorreta
+2 -> usuario nao existente
+3 -> registro realizado com sucesso
+4 -> nome em uso
+
+2 - C > S
+pacote enviado do client ao servidor para iniciar o processo de login
+logo apos esse pacote ser recebido no servidor, ele enviara o pacote com a chave RSA publica
+
+10 C > S
+pacote enviado do client ao servidor para indicar uma mensagem sendo enviada em um determinado canal
+a mensagem deve ser repasada num sistema de broadcast para todos os outros membros online daquele canal
