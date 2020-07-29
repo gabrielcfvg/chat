@@ -123,6 +123,8 @@ socket.on('data', data => {
             if (pacote.content === 0) {
                 // significa que o login foi efetuado com sucesso
                 login_status = true;
+                login_ready = true;
+                login_res = 0
 
             }
             else if (pacote.content === 1) {
@@ -156,6 +158,12 @@ function sleep(ms) {
 
 
 async function login(event, arg) {
+    
+    if (login_status) {
+        event.returnValue = 666;
+        return
+    }
+    
     dados.name = arg.name;
     dados.password = arg.password;
     dados.operation = arg.operation;
