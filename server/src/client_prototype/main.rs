@@ -19,7 +19,7 @@ pub fn json_to_bytes(data: Value) -> Vec<u8> {
 
 
 
-fn receiver(mut socket: TcpStream, name: String, senha: String, operation: u32) -> Result<(), Box<dyn std::error::Error>> {
+fn receiver(mut socket: TcpStream, name: String, senha: String, mut operation: u32) -> Result<(), Box<dyn std::error::Error>> {
 
     let mut mem: [u8; 2048];
     let mut data: String;
@@ -72,14 +72,30 @@ fn receiver(mut socket: TcpStream, name: String, senha: String, operation: u32) 
 
         let pacote: Value = serde_json::from_str(String::from_utf8_lossy(&mem2).trim_matches('\0').trim()).unwrap();
         println!("pacote: {}", pacote.to_string());
-        if pacote["type"].as_u64().expect("1") == 1 && pacote["content"].as_u64().expect("2") == 0 {
-            break;
+        if pacote["type"].as_u64().expect("1") == 1 {
+            
+            if operation == 0 {
+                if  pacote["content"].as_u64().expect("2") == 0 {
+                    break;
+                }
+                else {
+                    std::process::exit(1);
+                }
+            }
+            else if operation == 1 && pacote["content"].as_u64().expect("2") == 3 {
+                operation = 0;
+            }
+            std::thread::sleep_ms(1000)
+        }
+
+        if operation == 1 {
+            operation = 0;
         }
     }
 
     println!("conectado com sucesso como {}!!!", name);
 
-    socket.write(&json_to_bytes(json![{"type": 20, "content": 0}]))?;
+    socket.write(&json_to_bytes(json![{"type": 20, "content": 1}]))?;
     
     loop {
 
@@ -161,7 +177,7 @@ fn main() {
 
         std::io::stdin().read_line(&mut message).unwrap();
 
-        writer.write(&json_to_bytes(json![{"type": 10, "content": {"channel": 0, "message": message.trim()}}])).unwrap();
+        writer.write(&json_to_bytes(json![{"type": 10, "content": {"channel": 1, "message": message.trim()}}])).unwrap();
 
 
     }

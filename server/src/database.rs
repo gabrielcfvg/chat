@@ -1,36 +1,43 @@
 use std::path::Path;
 use std::io::ErrorKind;
-use serde_json::{Value};
 
 use crate::profile::Profile;
+use crate::channel::Channel;
 
 use rusqlite;
 
 #[allow(non_camel_case_types)]
-pub enum ProfileSelect {
-    by_ID(i32),
+pub enum Profile_Channel_Select {
+    by_ID(u32),
     by_name(String)
 }
 
 #[allow(non_camel_case_types)]
-pub struct Profile_API {
+pub struct Database_API {
     conexao: rusqlite::Connection
 }
 
-impl Profile_API {
+impl Database_API {
 
     pub fn new_in_memory() -> Result<Self, Box<dyn std::error::Error>> {
         let conexao = rusqlite::Connection::open_in_memory()?;
        
         conexao.execute("CREATE TABLE profiles (
             id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-            name           TEXT NOT NULL UNIQUE,
+            name            TEXT NOT NULL UNIQUE,
             hash            TEXT NOT NULL,
             servers         TEXT,
             contacts        TEXT
-            )", rusqlite::params![]).unwrap();
+        )", rusqlite::params![]).unwrap();
+            
+        conexao.execute("CREATE TABLE channels (
+            id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+            name            TEXT NOT NULL UNIQUE,
+            members         TEXT)", 
+            rusqlite::params![]).unwrap();
 
-        Ok(Profile_API {
+
+        Ok(Database_API {
             conexao
         })
     }
@@ -53,31 +60,40 @@ impl Profile_API {
             hash            TEXT NOT NULL,
             servers         TEXT,
             contacts        TEXT
-            )", rusqlite::params![]).unwrap();
+        )", rusqlite::params![]).unwrap();
+            
+        conexao.execute("CREATE TABLE channels (
+            id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+            name            TEXT NOT NULL UNIQUE,
+            members         TEXT)", 
+            rusqlite::params![]).unwrap();
+
         
-            Ok(Profile_API {
-            conexao
-        })
+        Ok(
+            Database_API {
+                conexao
+            }
+        )
     }
     
     pub fn open(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
 
         let conexao = rusqlite::Connection::open(path)?;
 
-        Ok(Profile_API {
+        Ok(Database_API {
             conexao
         })
     }
 
-    pub fn select_profile(&mut self, arg: ProfileSelect) -> rusqlite::Result<Option<Profile>> {
+    pub fn select_profile(&mut self, arg: Profile_Channel_Select) -> rusqlite::Result<Option<Profile>> {
 
         let query: String;
 
         match arg {
-            ProfileSelect::by_ID(id) => {
+            Profile_Channel_Select::by_ID(id) => {
                 query = format!(r#"SELECT id, name, hash, servers, contacts FROM profiles WHERE id = "{}""#, id);
             },
-            ProfileSelect::by_name(name) => {
+            Profile_Channel_Select::by_name(name) => {
                 query = format!(r#"SELECT id, name, hash, servers, contacts FROM profiles WHERE name = "{}""#, name);
             }
         }
@@ -121,15 +137,72 @@ impl Profile_API {
         let servers = serde_json::to_string(&profile.servers).unwrap();
         let contacts = serde_json::to_string(&profile.contacts).unwrap();
 
-        let tm = std::time::Instant::now();
         self.conexao.execute("INSERT INTO profiles (name, hash, servers, contacts) VALUES (?1, ?2,?3, ?4)", 
                              rusqlite::params![profile.name, profile.hash, servers, contacts]
                             ).unwrap();
-        println!("TEMPO: {}", tm.elapsed().as_micros());
+
         
         
         
         Ok(())
     }
+
+    pub fn select_channel(&mut self, arg: Profile_Channel_Select) -> rusqlite::Result<Option<Channel>> {
+
+        let query: String;
+
+        match arg {
+            Profile_Channel_Select::by_ID(id) => {
+                query = format!(r#"SELECT id, name, members FROM channels WHERE id = "{}""#, id);
+            },
+            Profile_Channel_Select::by_name(name) => {
+                query = format!(r#"SELECT id, name, members FROM channels WHERE name = "{}""#, name);
+            }
+        }
+
+        let prepate = self.conexao.prepare(&query);
+
+        if let Err(error) = prepate {
+
+            match error {
+                rusqlite::Error::SqliteFailure(code, txt) => {
+                    if txt.clone().unwrap().starts_with("no such column") {
+                        return Ok(None);
+                    }
+                    else {
+                        return Err(rusqlite::Error::SqliteFailure(code, txt));
+                    }
+                },
+                _ => {return Err(error)}
+            }
+        }
+
+        let mut prepate = prepate.unwrap();
+        let res = prepate.query_map(rusqlite::params![], |row| {
+            Ok(Channel::new_from_database(&row)?)
+        });
+
+        let channels: Vec<Channel> = res.unwrap().map(|x| x.unwrap()).collect();
+
+        if channels.len() >= 1 {
+            return Ok(Some(channels[0].clone()));
+        }
+        else {
+            return Ok(None);
+        }
+        
+    }
+
+    pub fn insert_channel(&mut self, channel: Channel) -> rusqlite::Result<()> {
+
+        let members = serde_json::to_string(&channel.members).unwrap();
+
+        self.conexao.execute("INSERT INTO channels (name, members) VALUES (?1, ?2)", 
+                             rusqlite::params![channel.name, members]
+                            ).unwrap();
+
+        Ok(())
+    }
+
 
 }

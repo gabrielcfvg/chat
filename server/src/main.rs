@@ -3,14 +3,13 @@
 // local
 mod client;
 mod database;
-mod message;
 mod channel;
 mod profile;
 
 use client::{client, login};
 
 // buit-in
-use std::net::{TcpStream, TcpListener, SocketAddr};
+use std::net::{TcpListener};
 use std::thread;
 use std::sync::{Mutex, Arc};
 use std::collections::HashMap;
@@ -25,11 +24,11 @@ use lazy_static::{lazy_static, initialize};
 
 type TypeBatch = Arc<Mutex<HashMap<u32, profile::NetProfile>>>;
 type TypeRsaPrivate = Arc<Rsa<Private>>;
-type TypeDatabase = Arc<Mutex<database::Profile_API>>;
+type TypeDatabase = Arc<Mutex<database::Database_API>>;
 type TypeChannel = Arc<Mutex<HashMap<u32, channel::Channel>>>;
 
 lazy_static!{
-    pub static ref DATABASE_CON: TypeDatabase   =  Arc::new(Mutex::new(database::Profile_API::open("teste.db").unwrap()));
+    pub static ref DATABASE_CON: TypeDatabase   =  Arc::new(Mutex::new(database::Database_API::open("teste.db").unwrap()));
     pub static ref CLIENTS: TypeBatch           =  Arc::new(Mutex::new(HashMap::new()));
     pub static ref CHANNELS: TypeChannel        =  Arc::new(Mutex::new(HashMap::new()));
     pub static ref RSA_PRIVATE: TypeRsaPrivate  =  Arc::new(Rsa::generate(2048).unwrap());
@@ -49,7 +48,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("client array ready!");
 
     initialize(&CHANNELS);
-    channel::Channel::new();
+    match channel::Channel::channel_from_database(1) {
+        Some(ch) => {
+            CHANNELS.lock().unwrap().insert(ch.id, ch);
+        }
+        None => {
+            let mut tmp_lock = DATABASE_CON.lock().unwrap();
+            tmp_lock.insert_channel(channel::Channel {
+                id: 666,
+                name: String::from("teste"),
+                members: vec![]
+            }).unwrap();
+            
+            drop(tmp_lock);
+            let ch = channel::Channel::channel_from_database(1).unwrap();
+            
+            CHANNELS.lock().unwrap().insert(ch.id, ch);
+        }
+    }
+
     println!("channels array ready!");
 
 
@@ -89,13 +106,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut addr = stream.local_addr()?;
         
         println!("nova conexão {} {}", addr.ip(), addr.port());
-
-        /*
-        // inserção do novo client no vetor de conexões
-        let mut tmp_lock = CLIENTS.lock().unwrap();
-        tmp_lock.insert(num, (stream.try_clone().unwrap(), addr.clone()));
-        drop(tmp_lock);
-        */
 
         // criação e execução da thread exclusiva do client
         thread::spawn(move || {

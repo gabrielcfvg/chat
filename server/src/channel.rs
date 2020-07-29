@@ -1,9 +1,8 @@
-use crate::message::{Message};
-use crate::{CHANNELS, CLIENTS};
+use crate::{CLIENTS, DATABASE_CON};
 use crate::client::json_to_bytes;
-use serde_json::json;
+use serde_json::{json, Value};
 use std::io::Write;
-use std::net::TcpStream;
+use crate::database::{Profile_Channel_Select};
 
 #[derive(Debug)]
 #[allow(non_camel_case_types)]
@@ -14,63 +13,28 @@ pub enum channel_error {
     author_is_not_the_owner
 }
 
+#[derive(Debug, Clone)]
 pub struct Channel {
     pub id: u32,
-    pub messages: Vec<Message>,
+    pub name: String,
     pub members: Vec<u32>,
 }
 
 impl Channel {
 
-    pub fn new() {
+    pub fn new_from_database(row: &rusqlite::Row) -> rusqlite::Result<Self> {
         
-        let mut tmp_lock = CHANNELS.lock().unwrap();
-        
-        let mut id = 0;
-        loop {
-            if !(tmp_lock.contains_key(&id)) {
-                break;
+        let members: String = row.get(2)?;
+        let members: Value = serde_json::from_str(members.as_str()).unwrap();
+        let members: Vec<u32> = members.as_array().unwrap().iter().map(|x| x.as_u64().unwrap() as u32).collect();
+
+        Ok(
+            Channel {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                members
             }
-            id += 1;
-        }
-
-
-        tmp_lock.insert(id, Channel{id, messages: vec![], members: vec![]});
-        drop(tmp_lock);
-    }
-
-    pub fn push_message(&mut self, autor: u32, content: String, src: u32) -> Result<(), channel_error> {
-
-        if self.members.contains(&autor) {
-            self.messages.push(Message::new(&self, autor, content, src));
-            Ok(())
-        }   
-        else {
-            Err(channel_error::member_not_in_channel)
-        }
-    }
-    
-    pub fn remove_message(&mut self, id: u32, autor: u32) -> Result<(), channel_error> {
-
-        let res = self.messages.remove_item(&Message{
-            id,
-            autor: 666,
-            content: String::from(""),
-            src: 666
-        });
-
-        if let None = res {
-            return Err(channel_error::non_existent_message);
-        }
-        
-        let res = res.unwrap();
-
-        if  res.autor != autor {
-            Err(channel_error::author_is_not_the_owner)
-        }
-        else {
-            Ok(())
-        }
+        )
     }
 
     pub fn message_broadcast(&mut self, autor: u32, message: String) -> Result<(), channel_error> {
@@ -86,7 +50,9 @@ impl Channel {
         for mem in self.members.iter() {
 
             if tmp_lock.contains_key(&mem) && *mem != autor {
-                tmp_lock.get_mut(&mem).unwrap().socket.write(&pacote).unwrap();
+                #[allow(unused_must_use)] {
+                tmp_lock.get_mut(&mem).unwrap().socket.write(&pacote);
+                }
             }
         }
 
@@ -99,5 +65,12 @@ impl Channel {
         if !(self.members.contains(&member)) {
             self.members.push(member);
         }
+    }
+
+    pub fn channel_from_database(id: u32) -> Option<Channel> {
+
+        let mut tmp_lock = DATABASE_CON.lock().unwrap();
+        tmp_lock.select_channel(Profile_Channel_Select::by_ID(id)).unwrap()
+
     }
 }

@@ -1,13 +1,19 @@
+use crate::{DATABASE_CON, database::Profile_Channel_Select, RSA_PRIVATE, CHANNELS, CLIENTS};
+use crate::profile::Profile;
+use crate::channel::Channel;
+
 use std::net::{TcpStream, SocketAddr};
 use std::io::{Read, Write};
+
 use serde_json;
 use serde_json::{Value, json};
-use crate::{DATABASE_CON, database::ProfileSelect, database, RSA_PRIVATE, CHANNELS};
+
 use openssl::rsa::Padding;
 use openssl::base64;
 use openssl::sha::sha256;
+
 use hex::encode;
-use crate::profile::Profile;
+
 
 pub fn login(conn: &mut TcpStream, addr: &mut SocketAddr) -> Result<Profile, Box<dyn std::error::Error>> {
 
@@ -59,7 +65,7 @@ pub fn login(conn: &mut TcpStream, addr: &mut SocketAddr) -> Result<Profile, Box
             let hash_senha = encode(sha256(u_senha.as_bytes()));
             
             let mut tmp_lock = DATABASE_CON.lock()?;
-            let search = tmp_lock.select_profile(ProfileSelect::by_name(u_nome.to_string()))?;
+            let search = tmp_lock.select_profile(Profile_Channel_Select::by_name(u_nome.to_string()))?;
             drop(tmp_lock);
 
             if u_operation == 0 {
@@ -123,44 +129,74 @@ pub fn client(mut conn: TcpStream, _addr: SocketAddr, id: u32) -> Result<(), Box
     // #   loop principal   #
     // ######################
     
+    // declaração da memoria e da variavel de dados convertidos
     let mut mem: [u8;2048];
-    let mut data;
+    let mut data: String;
     
     loop {
 
+        // limpeza da memoria
         mem = [0u8; 2048];
         
         conn.read(&mut mem)?;
         data = bytes_to_string(&mem);
 
+        // o caracter terminador de cada mensagem é um '|', isso porque o protocolo TCP não garante o fluxo dos dados
+        // isso faz com que seja possivel que 2 pacotes enviados separadamente sejam recebidos como um só
         for pacote in data.split("|") {
 
+            // caso o pacote seja nulo, não será processado
             if !(pacote.len() > 0) {
                 continue;
             }
             
+            // transformação do pacote em um objeto JSON
             let pacote: Value = serde_json::from_str(pacote)?;
 
+            // parseamento do identificador de protocolo do pacote
             match pacote["type"].as_u64().unwrap() {
                 
+
+                // protocolo de envio de mensagem em um determinado canal
+                // dentro do campo 'content' existe o campo 'channel' e 'message'
+                // 'channel' é o ID do canal onde a mensagem deve ser enviada em formato u32
+                // 'message' é a mensagem a ser enviada em formato String
                 10 => {
 
-                    println!("pacote: {:?}", pacote);
                     let channel = pacote["content"]["channel"].as_u64().unwrap() as u32;
                     let message = pacote["content"]["message"].as_str().unwrap();
 
-                    let tm = std::time::Instant::now();
+                    let tm = std::time::Instant::now(); // debug
+
                     let mut tmp_lock = CHANNELS.lock().unwrap();
 
+                    // verifica se o canal existe na memoria, caso exista a mensagem é enviada
                     if tmp_lock.contains_key(&channel) {
                         tmp_lock.get_mut(&channel).unwrap().message_broadcast(id.clone(), message.to_string()).unwrap();
                     }
-                    drop(tmp_lock);
-                    println!(">>>>>>>> tempo broadcast: {}", tm.elapsed().as_micros());
+                    else {
+                        
+                        // verifica se o canal existe no banco de dados,
+                        // caso exista, ele é carregado e inserido na memoria, e a mensagem é enviada
+                        match Channel::channel_from_database(channel) {
+                            Some(ch) => {
+                                tmp_lock.insert(channel, ch);
+                                tmp_lock.get_mut(&channel).unwrap().message_broadcast(id.clone(), message.to_string()).unwrap();
+                            }
+                            _ => {
+                                println!("canal não existente");
+                            }
+                        }
+                    }
 
+                    drop(tmp_lock);
+                    println!(">>>>>>>> tempo broadcast: {}", tm.elapsed().as_micros()); // debug
                 }
+                
+                
+                // protocolo para entrada de um client em determinado canal
                 20 => {
-                    println!("pacote: {:?}", pacote);
+                    
                     let channel = pacote["content"].as_u64().unwrap() as u32;
 
                     let mut tmp_lock = CHANNELS.lock().unwrap();
@@ -168,16 +204,30 @@ pub fn client(mut conn: TcpStream, _addr: SocketAddr, id: u32) -> Result<(), Box
                     if tmp_lock.contains_key(&channel) {
                         tmp_lock.get_mut(&channel).unwrap().add_member(id.clone());
                     }
+                    else {
+                        
+                        // verifica se o canal existe no banco de dados,
+                        // caso exista, ele é carregado e inserido na memoria, e o membro é adicionado
+                        match Channel::channel_from_database(channel) {
+                            Some(ch) => {
+                                tmp_lock.insert(channel, ch);
+                                tmp_lock.get_mut(&channel).unwrap().add_member(id.clone());
+                            }
+                            _ => ()
+                        }
+                    }
                     drop(tmp_lock);
+
+                    let mut tmp_lock = CLIENTS.lock()?;
+                    // nesse caso não é necessário verificar se o membro existe na memoria ou no banco de dados
+                    // já que se o membro está ativo, ele obrigatoriamente existe
+                    tmp_lock.get_mut(&id).unwrap().profile.add_channel(channel);
                 }
                 
                 _ => {}
             }
         }
     }
-    
-    
-    Ok(())
 }
 
 

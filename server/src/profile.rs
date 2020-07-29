@@ -7,8 +7,8 @@ pub struct Profile {
     pub id: u32, 
     pub name: String,
     pub hash: String,
-    pub servers: Vec<i32>,
-    pub contacts: Vec<i32>
+    pub servers: Vec<u32>,
+    pub contacts: Vec<u32>
 }
 
 impl Profile {
@@ -19,10 +19,10 @@ impl Profile {
         let contacts: String = row.get(4)?;
 
         let servers: Value = serde_json::from_str(servers.as_str()).unwrap();
-        let servers: Vec<i32> = servers.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as i32).collect();
+        let servers: Vec<u32> = servers.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as u32).collect();
 
         let contacts: Value = serde_json::from_str(contacts.as_str()).unwrap();
-        let contacts: Vec<i32> = contacts.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as i32).collect();
+        let contacts: Vec<u32> = contacts.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as u32).collect();
         
         
         Ok(Profile {
@@ -34,6 +34,11 @@ impl Profile {
         })
     }
     
+    pub fn add_channel(&mut self, channel: u32) {
+        if !(self.servers.contains(&channel)) {
+            self.servers.push(channel);
+        }
+    }
 }
 
 
