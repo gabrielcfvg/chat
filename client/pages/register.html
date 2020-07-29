@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Sigin</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div id="content">
+        <div id="formBox">
+            <label for="nickname" id="nicknameLabel">Nome de usuário</label>
+            <input type="text" id="nickname" onfocus="labelFocus(0)" onblur="labelBlur(0)">
+            <span id="nickname-border"></span>
+            <span id="nicknameError" onclick="noVisible(0)"></span>
+
+            <label for="password" id="passwordLabel">Senha</label>
+            <input type="password" id="password" onfocus="labelFocus(1)" onblur="labelBlur(1)" oninput="passwordLiveValidation()">
+            <span id="password-border"></span>
+            <span id="passwordError" onclick="noVisible(1)"></span>
+
+            <label for="passwordConfirm" id="passwordConfirmLabel">Confirmar senha</label>
+            <input type="password" id="passwordConfirm" onfocus="labelFocus(2)" onblur="labelBlur(2)" oninput="passwordConfirmLiveValidation()">
+            <span id="passwordConfirm-border"></span>
+            <span id="passwordConfirmError" onclick="noVisible(2)"></span>
+            
+            <input type="submit" value="Logar-se" id="logar" onclick="logIn()">
+        </div>
+    </div>
+    <script src="register.js"></script>
+</body>
+</html>
