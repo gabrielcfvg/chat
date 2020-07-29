@@ -120,29 +120,14 @@ socket.on('data', data => {
         }
         else if (pacote.type === 1) {
 
-            if (pacote.content === 0) {
-                // significa que o login foi efetuado com sucesso
-                login_status = true;
+                if (pacote.content === 0) {
+                    login_status = true;
+                }
+
                 login_ready = true;
-                login_res = 0
+                login_res = pacote.content;
 
-            }
-            else if (pacote.content === 1) {
-                // significa que o usuário existe, mas a senha está incorreta
-
-            }
-            else if (pacote.content === 2) {
-                // significa que não existe nenhum usuário com esse nome
-
-            }
-            else if (pacote.content === 3) {
-                // significa que o registo foi realizado com sucesso
-
-            }
-            else if (pacote.content === 4) {
-                // significa que o nome já está em uso, e não pode ser registrado
-
-            }
+            
             console.log(">>>" + pacote.content.toString());
 
         }
