@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="svg6"
+   version="1.1"
+   fill="none"
+   viewBox="0 0 64 64"
+   height="64"
+   width="64">
+  <metadata
+     id="metadata12">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs10" />
+  <rect
+     id="rect2"
+     fill="#4F4F4F"
+     height="64"
+     width="64"
+     y="0"
+     x="0" />
+  <path
+     d="M 40.246094 10.720703 C 37.959815 13.505274 36.112019 16.715013 34.705078 20.349609 C 33.327448 23.954895 32.638672 27.8378 32.638672 32 C 32.638672 36.1622 33.327448 40.060716 34.705078 43.695312 C 36.112019 47.300599 37.959815 50.494727 40.246094 53.279297 L 43.148438 51.300781 C 41.038027 48.574833 39.439986 45.61485 38.355469 42.419922 C 37.270952 39.224994 36.728516 35.751842 36.728516 32 C 36.728516 28.248158 37.270952 24.775006 38.355469 21.580078 C 39.439986 18.385149 41.038027 15.425166 43.148438 12.699219 L 40.246094 10.720703 z M 23.798828 22.283203 C 22.890179 22.283203 22.172134 22.575884 21.644531 23.162109 C 21.116929 23.748335 20.851562 24.437112 20.851562 25.228516 C 20.851562 26.01992 21.116929 26.708697 21.644531 27.294922 C 22.172134 27.881147 22.890179 28.175781 23.798828 28.175781 C 24.707477 28.175781 25.425522 27.881147 25.953125 27.294922 C 26.480728 26.708697 26.744141 26.01992 26.744141 25.228516 C 26.744141 24.437112 26.480728 23.748335 25.953125 23.162109 C 25.425522 22.575884 24.707477 22.283203 23.798828 22.283203 z M 23.798828 39.826172 C 22.890179 39.826172 22.172134 40.118853 21.644531 40.705078 C 21.116929 41.291303 20.851562 41.98008 20.851562 42.771484 C 20.851562 43.562889 21.116929 44.251665 21.644531 44.837891 C 22.172134 45.424116 22.890179 45.716797 23.798828 45.716797 C 24.707477 45.716797 25.425522 45.424116 25.953125 44.837891 C 26.480728 44.251665 26.744141 43.562889 26.744141 42.771484 C 26.744141 41.98008 26.480728 41.291303 25.953125 40.705078 C 25.425522 40.118853 24.707477 39.826172 23.798828 39.826172 z "
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:43.9669px;line-height:1.25;font-family:Ubuntu;-inkscape-font-specification:'Ubuntu, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;font-variation-settings:normal;letter-spacing:0px;word-spacing:0px;vector-effect:none;fill:#383737;fill-opacity:1;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;stop-color:#000000"
+     id="path887" />
+</svg>

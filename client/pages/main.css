@@ -54,6 +54,10 @@
     box-shadow: 0.3vw 0 1vw var(--c2);
 }
 
+#leftMenu > .user-icon {
+    z-index: 1;
+}
+
 #content #leftMenu .user-icon {
     width: 6vw;
     height: 6vw;
@@ -69,7 +73,7 @@
     align-items: center;
     border-radius: 50%;
     box-shadow: 0 0 1vmin var(--c4);
-    transition: border-radius var(--t1), box-shadow var(--t1);
+    transition: border-radius var(--t1), box-shadow var(--t1), margin var(--t1), opacity var(--t1);
 }
 
 #content #leftMenu .user-icon.active {
@@ -105,8 +109,8 @@
     min-width: calc(100vw - 10vh);
     max-width: calc(100vw - 8vh);
     height: 95vh;
-    min-height: calc(100vh - 2vw);
-    max-height: calc(100vh - 10vw);
+    min-height: calc(100vh - 10vw);
+    max-height: calc(100vh - 2vw);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -216,4 +220,29 @@
 #nicknameError.visible, #passwordError.visible, #passwordConfirmError.visible {
     height: 3vh;
     margin: 1vh 0;
+}
+
+#configBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 92vw;
+    min-width: calc(100vw - 10vh);
+    max-width: calc(100vw - 8vh);
+    height: 95vh;
+    min-height: calc(100vh - 10vw);
+    max-height: calc(100vh - 2vw);
+    overflow-x: hidden;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+#configBox::-webkit-scrollbar {
+    display: none;
+}
+
+#configBox .configItem {
+    background-color: red;
 }
