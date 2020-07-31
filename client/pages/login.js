@@ -1,5 +1,4 @@
 const { ipcRenderer } = require('electron')
-const fs = require("fs")
 const label = [document.getElementById("nicknameLabel"), document.getElementById("passwordLabel")]
 const input = [document.getElementById("nickname"), document.getElementById("password")]
 const error = [document.getElementById("nicknameError"), document.getElementById("passwordError")]
@@ -51,5 +50,5 @@ function noVisible(id) {
 }
 
 
-
+writeText();
 

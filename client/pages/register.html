@@ -5,22 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - Sigin</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="main.css">
+    <script src="utils.js"></script>
 </head>
 <body>
     <div id="content">
         <div id="formBox">
-            <label for="nickname" id="nicknameLabel">Nome de usuário</label>
+            <label for="nickname" id="nicknameLabel" class="text-username"></label>
             <input type="text" id="nickname" onfocus="labelFocus(0)" onblur="labelBlur(0)">
             <span id="nickname-border"></span>
             <span id="nicknameError" onclick="noVisible(0)"></span>
 
-            <label for="password" id="passwordLabel">Senha</label>
+            <label for="password" id="passwordLabel" class="text-password"></label>
             <input type="password" id="password" onfocus="labelFocus(1)" onblur="labelBlur(1)" oninput="passwordLiveValidation()">
             <span id="password-border"></span>
             <span id="passwordError" onclick="noVisible(1)"></span>
 
-            <label for="passwordConfirm" id="passwordConfirmLabel">Confirmar senha</label>
+            <label for="passwordConfirm" id="passwordConfirmLabel" class="text-passwordconfirm"></label>
             <input type="password" id="passwordConfirm" onfocus="labelFocus(2)" onblur="labelBlur(2)" oninput="passwordConfirmLiveValidation()">
             <span id="passwordConfirm-border"></span>
             <span id="passwordConfirmError" onclick="noVisible(2)"></span>

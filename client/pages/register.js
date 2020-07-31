@@ -1,5 +1,4 @@
 const { ipcRenderer } = require('electron')
-const fs = require("fs")
 const label = [document.getElementById("nicknameLabel"), document.getElementById("passwordLabel"), document.getElementById("passwordConfirmLabel")]
 const input = [document.getElementById("nickname"),      document.getElementById("password"),      document.getElementById("passwordConfirm")     ]
 const error = [document.getElementById("nicknameError"), document.getElementById("passwordError"), document.getElementById("passwordConfirmError")]
@@ -69,3 +68,4 @@ function passwordConfirmLiveValidation() {
     }
 }
 
+writeText();

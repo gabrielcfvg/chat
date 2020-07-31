@@ -5,20 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - Login</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="main.css">
+    <script src="utils.js"></script>
 </head>
 <body>
     <div id="content">
         <div id="formBox">
-            <label for="nickname" id="nicknameLabel">Nome de usuário</label>
+            <label for="nickname" id="nicknameLabel" class="text-username"></label>
             <input type="text" id="nickname" onfocus="labelFocus(0)" onblur="labelBlur(0)">
             <span id="nickname-border"></span>
-            <span id="nicknameError" onclick="noVisible(0)">Erro relativo ao nome de usuário</span>
+            <span id="nicknameError" onclick="noVisible(0)"></span>
 
-            <label for="password" id="passwordLabel">Senha</label>
+            <label for="password" id="passwordLabel" class="text-password"></label>
             <input type="password" id="password" onfocus="labelFocus(1)" onblur="labelBlur(1)">
             <span id="password-border"></span>
-            <span id="passwordError" onclick="noVisible(1)">Erro relativo à senha</span>
+            <span id="passwordError" onclick="noVisible(1)"></span>
             
             <input type="submit" value="Logar-se" id="logar" onclick="logIn()">
         </div>

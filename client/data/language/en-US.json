@@ -1,0 +1,19 @@
+{
+    "notify": "Receive notifications",
+    "myaccount": "My account",
+    "privacy": "Privacy",
+    "theme": "Theme",
+    "nochatselected": "You don`t selected any chat",
+    "nochatselected1": "Select a channel or a conversation",
+    "soon": "Comming soon",
+    "soon1": "The servers will be added soon, wait",
+    "password": "Password",
+    "username": "Username",
+    "passwordconfirm": "Confirm password",
+    "notdisturb": "Don`t disturb",
+    "iamonline": "I`m online",
+    "msgfromall": "Receive messages from anyone, no only from my friends",
+    "interface": "Interface",
+    "language": "Language",
+    "langonly": "Only en-US and pt-BR"
+}

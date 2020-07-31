@@ -1,0 +1,44 @@
+<div id="configBox">
+    <div class="configItem">
+        <div class="configItemTitle text-myaccount" onclick="toggleConfig(0)"></div>
+        <div class="configItemToggle" onclick="toggleCheck(0, 'notify')">
+            <div class="checkbox status-notify"></div>
+            <span class="text-notify"></span>
+        </div>
+        <div class="configItemToggle" onclick="toggleCheck(1, 'online')">
+            <div class="checkbox status-iamonline"></div>
+            <span class="text-iamonline"></span>
+        </div>
+    </div>
+    <div class="configItem">
+        <div class="configItemTitle text-privacy" onclick="toggleConfig(1)"></div>
+        <div class="configItemToggle" onclick="toggleCheck(2, 'messagesfromall')">
+            <div class="checkbox status-msgfromall"></div>
+            <span class="text-msgfromall"></span>
+        </div>
+    </div>
+    <div class="configItem">
+        <div class="configItemTitle text-interface" onclick="toggleConfig(2)"></div>
+        <div class="configItemInput">
+            <span class="text-language"></span>
+            <input type="text" class="status-language config-input" onchange="setConfig(0, 'language')" onfocus="toggleClass('config-input', 0, 'changing', true)" onblur="toggleClass('config-input', 0, 'changing', false)">
+        </div>
+        <p class="text-langonly"></p>
+        <div class="configItemButtons">
+            <button onclick="setTheme('dark.json', true); location.href=location.href">dark</button>
+            <button onclick="setTheme('light.json', true); location.href=location.href">light</button>
+        </div>
+        <div class="configItemPickers">
+            <input type="color" id="p-c1" oninput="document.getElementById('p-c1').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-c2" oninput="document.getElementById('p-c2').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-c3" oninput="document.getElementById('p-c3').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-c4" oninput="document.getElementById('p-c4').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-cl1" oninput="document.getElementById('p-cl1').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-cl2" oninput="document.getElementById('p-cl2').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-cl3" oninput="document.getElementById('p-cl3').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-cm1" oninput="document.getElementById('p-cm1').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-cc1" oninput="document.getElementById('p-cc1').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-cc2" oninput="document.getElementById('p-cc2').classList.add('changing')" onchange="updateColors()">
+        </div>
+    </div>
+</div>

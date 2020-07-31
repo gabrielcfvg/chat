@@ -1,0 +1,19 @@
+{
+    "notify": "Receber notificações",
+    "myaccount": "Minha conta",
+    "privacy": "Privacidade",
+    "theme": "Tema",
+    "nochatselected": "Você não selecionou nenhum chat",
+    "nochatselected1": "Selecione um canal ou uma conversa",
+    "soon": "Em breve",
+    "soon1": "Os servidores seram adicionados em breve, aguarde",
+    "password": "Senha",
+    "username": "Nome de usuário",
+    "passwordconfirm": "Confirmar senha",
+    "notdisturb": "Não pertube",
+    "iamonline": "Estou online",
+    "msgfromall": "Receber mensagens de qualquer um, não somente dos amigos",
+    "interface": "Interface",
+    "language": "Idioma",
+    "langonly": "Somente pt-BR e en-US"
+}

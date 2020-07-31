@@ -1,16 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
-:root {
-    --c1: #2F2F2F;
-    --c2: #282727;
-    --c3: #161616;
-    --c4: #050505;
-    --cl1: #eeeeee;
-    --cl2: #bbbbbb;
-    --cl3: #999999;
-    --cc1: #6780D8;
-    --cc2: #5270C5;
-    --t1: 250ms;
-}
 
 * {
     margin: 0;
@@ -244,5 +232,154 @@
 }
 
 #configBox .configItem {
-    background-color: red;
+    width: 100%;
+    height: calc(8vh + 2px);
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    border-bottom: 2px solid var(--c2);
+    transition: height var(--t1);
+}
+
+#configBox .configItem * {
+    flex: none;
+}
+
+#configBox .configItem .configItemTitle {
+    width: 100%;
+    height: 8vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3vmin;
+    font-family: "Montserrat";
+    color: var(--cl1);
+    cursor: pointer;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#configBox .configItem .configItemToggle {
+    width: 100%;
+    height: 8vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 2.5vmin;
+    font-family: "Montserrat";
+    color: var(--cl2);
+}
+
+#configBox .configItem .configItemToggle .checkbox {
+    position: relative;
+    width: 10vmin;
+    height: 5vmin;
+    margin: 0 2vmin;
+    border-radius: 2.5vmin;
+    background-color: #eeeeee;
+    box-shadow: 0 0 1.5vmin var(--cm1) inset;
+    cursor: pointer;
+    transition: background-color var(--t1);
+}
+
+#configBox .configItem .configItemToggle .checkbox::before {
+    content: "";
+    position: absolute;
+    width: 4vmin;
+    height: 4vmin;
+    top: 0.5vmin;
+    left: 0.5vmin;
+    background-color: #eeeeee;
+    border-radius: 2vmin;
+    box-shadow: 0 0 1.5vmin var(--cm1);
+    transition: left var(--t1);
+}
+
+#configBox .configItem .configItemToggle .checkbox.on {
+    background-color: var(--cc1);
+}
+
+#configBox .configItem .configItemToggle .checkbox.on::before {
+    left: 5.5vmin;
+}
+
+#configBox .configItem .configItemInput {
+    width: 100%;
+    height: 8vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 2.5vmin;
+    font-family: "Montserrat";
+    color: var(--cl2);
+}
+
+#configBox .configItem .configItemInput span {
+    width: calc(50% - 3vmin);
+    margin: 0 2vmin;
+}
+
+#configBox .configItem .configItemInput input {
+    width: calc(50% - 2vmin);
+    height: 60%;
+    outline: none;
+    border: none;
+    background-color: var(--c2);
+    color: var(--cl1);
+    padding: 0 2vmin;
+    font-size: 2.5vmin;
+}
+
+#configBox .configItem p {
+    text-align: right;
+    font-family: "Montserrat";
+    font-size: 2.5vmin;
+    color: var(--cl2);
+    padding: 0 2vmin;
+}
+
+#configBox .configItem .configItemButtons {
+    width: 100%;
+    height: 10vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+#configBox .configItem .configItemButtons button {
+    width: 40%;
+    height: 60%;
+    outline: none;
+    border: none;
+    background-color: var(--c2);
+    color: var(--cl1);
+}
+
+input[type="color"] {
+    border-radius: 100%;
+    height: 10vmin;
+    width: 10vmin;
+    border: 2px solid var(--cl1);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;	
+}
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 100%;
+}
+
+#configBox .configItem .configItemPickers {
+    width: 100%;
+    height: 10vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
 }
