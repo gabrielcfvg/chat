@@ -5,13 +5,14 @@ mod client;
 mod database;
 mod channel;
 mod profile;
+mod time;
 
 use client::{client, login};
 
 // buit-in
 use std::net::{TcpListener};
 use std::thread;
-use std::sync::{Mutex, Arc};
+use std::sync::{Mutex, RwLock};
 use std::collections::HashMap;
 
 // third-party
@@ -22,16 +23,16 @@ use lazy_static::{lazy_static, initialize};
 
 
 
-type TypeBatch = Arc<Mutex<HashMap<u32, profile::NetProfile>>>;
-type TypeRsaPrivate = Arc<Rsa<Private>>;
-type TypeDatabase = Arc<Mutex<database::Database_API>>;
-type TypeChannel = Arc<Mutex<HashMap<u32, channel::Channel>>>;
+type TypeBatch = RwLock<HashMap<u32, Mutex<profile::NetProfile>>>;
+type TypeRsaPrivate = Rsa<Private>;
+type TypeDatabase = Mutex<database::Database_API>;
+type TypeChannel = RwLock<HashMap<u32, Mutex<channel::Channel>>>;
 
 lazy_static!{
-    pub static ref DATABASE_CON: TypeDatabase   =  Arc::new(Mutex::new(database::Database_API::open("teste.db").unwrap()));
-    pub static ref CLIENTS: TypeBatch           =  Arc::new(Mutex::new(HashMap::new()));
-    pub static ref CHANNELS: TypeChannel        =  Arc::new(Mutex::new(HashMap::new()));
-    pub static ref RSA_PRIVATE: TypeRsaPrivate  =  Arc::new(Rsa::generate(2048).unwrap());
+    pub static ref DATABASE_CON: TypeDatabase   =  Mutex::new(database::Database_API::open("teste.db").unwrap());
+    pub static ref CLIENTS: TypeBatch           =  RwLock::new(HashMap::new());
+    pub static ref CHANNELS: TypeChannel        =  RwLock::new(HashMap::new());
+    pub static ref RSA_PRIVATE: TypeRsaPrivate  =  Rsa::generate(2048).unwrap();
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -50,9 +51,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     initialize(&CHANNELS);
     match channel::Channel::channel_from_database(1) {
         Some(ch) => {
-            CHANNELS.lock().unwrap().insert(ch.id, ch);
+            println!("canal já existente");
+            CHANNELS.write().unwrap().insert(ch.id, Mutex::new(ch));
+
         }
         None => {
+            println!("criando canal");
             let mut tmp_lock = DATABASE_CON.lock().unwrap();
             tmp_lock.insert_channel(channel::Channel {
                 id: 666,
@@ -63,7 +67,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             drop(tmp_lock);
             let ch = channel::Channel::channel_from_database(1).unwrap();
             
-            CHANNELS.lock().unwrap().insert(ch.id, ch);
+            CHANNELS.write().unwrap().insert(ch.id, Mutex::new(ch));
         }
     }
 
@@ -114,13 +118,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(profile) => {
                     
                     let id = profile.id;
+                    let name = profile.name.clone();
 
                     // inserção do novo client no vetor de conexões
-                    let mut tmp_lock = CLIENTS.lock().unwrap();
-                    tmp_lock.insert(id, profile::NetProfile::from_profile(profile, stream.try_clone().unwrap(), addr.clone()));
+                    let mut tmp_lock = CLIENTS.write().unwrap();
+                    tmp_lock.insert(id, Mutex::new(profile::NetProfile::from_profile(profile, stream.try_clone().unwrap(), addr.clone())));
                     drop(tmp_lock);
 
-                    match client(stream, addr, id) {
+                    match client(stream, addr, id, name) {
                         Err(erro) => {                 
                             println!("{} => {:?}", num, erro);
                         }
@@ -128,11 +133,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                     
                     // remoção do client do vetor de conexões
-                    let mut tmp_lock = CLIENTS.lock().unwrap();
+                    let mut tmp_lock = CLIENTS.write().unwrap();
                     tmp_lock.remove(&id);
-                    
                     println!("clientes conectados: {}", tmp_lock.len());
-                    drop(tmp_lock);
                 
                 }
                 Err(erro) => {

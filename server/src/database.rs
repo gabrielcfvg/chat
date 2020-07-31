@@ -13,6 +13,18 @@ pub enum Profile_Channel_Select {
 }
 
 #[allow(non_camel_case_types)]
+pub enum ProfileUpdate {
+    update_servers(String),
+    update_contacts(String)
+}
+
+#[allow(non_camel_case_types)]
+pub enum ChannelUpdate {
+    update_members(String)
+}
+
+
+#[allow(non_camel_case_types)]
 pub struct Database_API {
     conexao: rusqlite::Connection
 }
@@ -85,6 +97,8 @@ impl Database_API {
         })
     }
 
+
+
     pub fn select_profile(&mut self, arg: Profile_Channel_Select) -> rusqlite::Result<Option<Profile>> {
 
         let query: String;
@@ -147,6 +161,54 @@ impl Database_API {
         Ok(())
     }
 
+    pub fn update_profile(&mut self, selecao: Profile_Channel_Select, alterar: ProfileUpdate) -> rusqlite::Result<()> {
+
+        let mut query = String::new();
+
+        match alterar {
+            ProfileUpdate::update_contacts(con) => {
+                query += format!(r#"UPDATE profiles SET contacts = "{}" "#, con).as_str();
+            }
+            ProfileUpdate::update_servers(ser) => {
+                query += format!(r#"UPDATE profiles SET servers = "{}" "#, ser).as_str();
+            }
+        }
+
+        match selecao {
+            Profile_Channel_Select::by_ID(id) => {
+                query += format!(r#"WHERE id = "{}""#, id).as_str();
+            }
+            Profile_Channel_Select::by_name(name) => {
+                query += format!(r#"WHERE name = "{}""#, name).as_str();
+            }
+        }
+        let prepate = self.conexao.prepare(&query);
+
+        if let Err(error) = prepate {
+
+            println!("error update profile = {:?}", error);
+            match error {
+                rusqlite::Error::SqliteFailure(code, txt) => {
+                    if txt.clone().unwrap().starts_with("no such column") {
+                        return Ok(());
+                    }
+                    else {
+                        return Err(rusqlite::Error::SqliteFailure(code, txt));
+                    }
+                },
+                _ => {
+                    return Err(error)
+                }
+            }
+        }
+
+        prepate?.execute(rusqlite::params![])?;
+
+        Ok(())
+    }
+
+
+
     pub fn select_channel(&mut self, arg: Profile_Channel_Select) -> rusqlite::Result<Option<Channel>> {
 
         let query: String;
@@ -204,5 +266,45 @@ impl Database_API {
         Ok(())
     }
 
+    pub fn update_channel(&mut self, selecao: Profile_Channel_Select, alterar: ChannelUpdate) -> rusqlite::Result<()> {
 
+        let mut query = String::new();
+
+        match alterar {
+            ChannelUpdate::update_members(mem) => {
+                query += format!(r#"UPDATE channels SET members = "{}" "#, mem).as_str();
+            }
+        }
+
+        match selecao {
+            Profile_Channel_Select::by_ID(id) => {
+                query += format!(r#"WHERE id = {}"#, id).as_str();
+            }
+            Profile_Channel_Select::by_name(name) => {
+                query += format!(r#"WHERE name = "{}""#, name).as_str();
+            }
+        }
+
+        let prepate = self.conexao.prepare(&query);
+
+        if let Err(error) = prepate {
+
+            println!("error update channels = {:?}", error);
+            match error {
+                rusqlite::Error::SqliteFailure(code, txt) => {
+                    if txt.clone().unwrap().starts_with("no such column") {
+                        return Ok(());
+                    }
+                    else {
+                        return Err(rusqlite::Error::SqliteFailure(code, txt));
+                    }
+                },
+                _ => {return Err(error)}
+            }
+        }
+
+        prepate?.execute(rusqlite::params![])?;
+
+        Ok(())
+    }
 }

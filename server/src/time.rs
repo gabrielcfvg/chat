@@ -1,6 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-struct Time;
+pub struct Time;
 
 impl Time {
 

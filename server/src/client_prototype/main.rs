@@ -117,8 +117,9 @@ fn receiver(mut socket: TcpStream, name: String, senha: String, mut operation: u
 
                     let autor = value_json["content"]["autor"].to_string();
                     let message = value_json["content"]["message"].to_string();
+                    let channel = value_json["content"]["channel"].to_string();
 
-                    println!("\nautor: {}, mensagem: {}", autor, message);
+                    println!("\nchannel: {}, autor: {}, mensagem: {}", channel, autor, message);
 
                 }
                 _ => ()
