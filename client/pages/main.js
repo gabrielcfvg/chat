@@ -259,7 +259,7 @@ function updateColors() {
 }
 
 function resetSettings() {
-    fs.writeFile("data/configs.json", fs.readFileSync("data/defaultConfigs.json", { encoding: "utf-8", flag: "r" }));
+    fs.writeFile("data/configs.json", fs.readFileSync("data/defaultConfigs.json", { encoding: "utf-8", flag: "r" }), ()=>0);
 }
 
 
