@@ -15,5 +15,7 @@
     "msgfromall": "Receive messages from anyone, no only from my friends",
     "interface": "Interface",
     "language": "Language",
-    "langonly": "Only en-US and pt-BR"
+    "langonly": "Only en-US and pt-BR",
+    "savechanges": "Save changes",
+    "returndefaults": "Return to the default settings"
 }

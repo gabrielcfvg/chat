@@ -29,16 +29,20 @@
             <button onclick="setTheme('light.json', true); location.href=location.href">light</button>
         </div>
         <div class="configItemPickers">
-            <input type="color" id="p-c1" oninput="document.getElementById('p-c1').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-c2" oninput="document.getElementById('p-c2').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-c3" oninput="document.getElementById('p-c3').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-c4" oninput="document.getElementById('p-c4').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-cl1" oninput="document.getElementById('p-cl1').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-cl2" oninput="document.getElementById('p-cl2').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-cl3" oninput="document.getElementById('p-cl3').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-cm1" oninput="document.getElementById('p-cm1').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-cc1" oninput="document.getElementById('p-cc1').classList.add('changing')" onchange="updateColors()">
-            <input type="color" id="p-cc2" oninput="document.getElementById('p-cc2').classList.add('changing')" onchange="updateColors()">
+            <input type="color" id="p-c1" oninput="document.getElementById('p-c1').classList.add('changing')">
+            <input type="color" id="p-c2" oninput="document.getElementById('p-c2').classList.add('changing')">
+            <input type="color" id="p-c3" oninput="document.getElementById('p-c3').classList.add('changing')">
+            <input type="color" id="p-c4" oninput="document.getElementById('p-c4').classList.add('changing')">
+            <input type="color" id="p-cl1" oninput="document.getElementById('p-cl1').classList.add('changing')">
+            <input type="color" id="p-cl2" oninput="document.getElementById('p-cl2').classList.add('changing')">
+            <input type="color" id="p-cl3" oninput="document.getElementById('p-cl3').classList.add('changing')">
+            <input type="color" id="p-cm1" oninput="document.getElementById('p-cm1').classList.add('changing')">
+            <input type="color" id="p-cc1" oninput="document.getElementById('p-cc1').classList.add('changing')">
+            <input type="color" id="p-cc2" oninput="document.getElementById('p-cc2').classList.add('changing')">
         </div>
+    </div>
+    <div class="buttonBox">
+        <button class="text-savechanges" onclick="updateColors(); writeConfig(); location.href=location.href"></button> <!-- TODO: change this -->
+        <button class="text-returndefaults" onclick="resetSettings()"></button>
     </div>
 </div>

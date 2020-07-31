@@ -159,13 +159,11 @@ function toggleCheck(id, key) {
     var obj = document.getElementsByClassName("checkbox")[id];
     obj.classList.toggle("on");
     settings[key] = obj.classList.contains("on");
-    writeConfig();
 }
 
 function setConfig(id, key) {
     var obj = document.getElementsByClassName("config-input")[id];
     settings[key] = obj.value;
-    writeConfig();
 }
 
 function toggleClass(_class, id, classname, add) {
@@ -258,6 +256,10 @@ function updateColors() {
         }
     }
     setTheme(JSON.stringify(data), false);
+}
+
+function resetSettings() {
+    fs.writeFile("data/configs.json", fs.readFileSync("data/defaultConfigs.json", { encoding: "utf-8", flag: "r" }));
 }
 
 
