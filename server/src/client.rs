@@ -4,6 +4,7 @@ use crate::channel::Channel;
 
 use std::net::{TcpStream, SocketAddr};
 use std::io::{Read, Write};
+use std::sync::Mutex;
 
 use serde_json;
 use serde_json::{Value, json};
@@ -15,7 +16,7 @@ use openssl::sha::sha256;
 use hex::encode;
 
 
-pub fn login(conn: &mut TcpStream, addr: &mut SocketAddr) -> Result<Profile, Box<dyn std::error::Error>> {
+pub fn login(conn: &mut TcpStream, _addr: &mut SocketAddr) -> Result<Profile, Box<dyn std::error::Error>> {
 
     let u_profile: Profile;
 
@@ -116,15 +117,17 @@ pub fn login(conn: &mut TcpStream, addr: &mut SocketAddr) -> Result<Profile, Box
         }
     }
 
-    println!("client ({} {}) logado como {}", addr.ip(), addr.port(), u_profile.name);
-
     Ok(u_profile)
 
 }
 
 
-pub fn client(mut conn: TcpStream, _addr: SocketAddr, id: u32) -> Result<(), Box<dyn std::error::Error>> {
+pub fn client(mut conn: TcpStream, addr: SocketAddr, id: u32, name: String) -> Result<(), Box<dyn std::error::Error>> {
     
+    println!("client ({} {}) logado como {}", addr.ip(), addr.port(), name);
+
+
+
     // ######################
     // #   loop principal   #
     // ######################
@@ -168,20 +171,22 @@ pub fn client(mut conn: TcpStream, _addr: SocketAddr, id: u32) -> Result<(), Box
 
                     let tm = std::time::Instant::now(); // debug
 
-                    let mut tmp_lock = CHANNELS.lock().unwrap();
+                    let tmp_lock = CHANNELS.read()?;
 
                     // verifica se o canal existe na memoria, caso exista a mensagem é enviada
                     if tmp_lock.contains_key(&channel) {
-                        tmp_lock.get_mut(&channel).unwrap().message_broadcast(id.clone(), message.to_string()).unwrap();
+                        tmp_lock.get(&channel).unwrap().lock().unwrap().message_broadcast(id.clone(), name.clone(), message.to_string()).unwrap();
+                        drop(tmp_lock);
                     }
                     else {
+                        drop(tmp_lock);
                         
                         // verifica se o canal existe no banco de dados,
                         // caso exista, ele é carregado e inserido na memoria, e a mensagem é enviada
                         match Channel::channel_from_database(channel) {
                             Some(ch) => {
-                                tmp_lock.insert(channel, ch);
-                                tmp_lock.get_mut(&channel).unwrap().message_broadcast(id.clone(), message.to_string()).unwrap();
+                                CHANNELS.write()?.insert(channel, Mutex::new(ch));
+                                CHANNELS.read()?.get(&channel).unwrap().lock().unwrap().message_broadcast(id.clone(), name.clone(), message.to_string()).unwrap();
                             }
                             _ => {
                                 println!("canal não existente");
@@ -189,7 +194,6 @@ pub fn client(mut conn: TcpStream, _addr: SocketAddr, id: u32) -> Result<(), Box
                         }
                     }
 
-                    drop(tmp_lock);
                     println!(">>>>>>>> tempo broadcast: {}", tm.elapsed().as_micros()); // debug
                 }
                 
@@ -199,29 +203,29 @@ pub fn client(mut conn: TcpStream, _addr: SocketAddr, id: u32) -> Result<(), Box
                     
                     let channel = pacote["content"].as_u64().unwrap() as u32;
 
-                    let mut tmp_lock = CHANNELS.lock().unwrap();
+                    let tmp_lock = CHANNELS.read().unwrap();
 
                     if tmp_lock.contains_key(&channel) {
-                        tmp_lock.get_mut(&channel).unwrap().add_member(id.clone());
+                        tmp_lock.get(&channel).unwrap().lock().unwrap().add_member(id.clone());
+                        drop(tmp_lock);
                     }
                     else {
-                        
+                        drop(tmp_lock);
+
                         // verifica se o canal existe no banco de dados,
                         // caso exista, ele é carregado e inserido na memoria, e o membro é adicionado
                         match Channel::channel_from_database(channel) {
                             Some(ch) => {
-                                tmp_lock.insert(channel, ch);
-                                tmp_lock.get_mut(&channel).unwrap().add_member(id.clone());
+                                CHANNELS.write()?.insert(channel, Mutex::new(ch));
+                                CHANNELS.read()?.get(&channel).unwrap().lock().unwrap().add_member(id.clone());
                             }
                             _ => ()
                         }
                     }
-                    drop(tmp_lock);
 
-                    let mut tmp_lock = CLIENTS.lock()?;
                     // nesse caso não é necessário verificar se o membro existe na memoria ou no banco de dados
                     // já que se o membro está ativo, ele obrigatoriamente existe
-                    tmp_lock.get_mut(&id).unwrap().profile.add_channel(channel);
+                    CLIENTS.read().unwrap().get(&id).unwrap().lock().unwrap().profile.add_channel(channel);
                 }
                 
                 _ => {}

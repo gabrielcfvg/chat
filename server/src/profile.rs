@@ -1,5 +1,7 @@
 use serde_json::{Value};
 use std::net::{TcpStream, SocketAddr};
+use crate::database::{Profile_Channel_Select, ProfileUpdate};
+use crate::{DATABASE_CON};
 
 #[derive(Debug, Clone)]
 pub struct Profile {
@@ -37,8 +39,18 @@ impl Profile {
     pub fn add_channel(&mut self, channel: u32) {
         if !(self.servers.contains(&channel)) {
             self.servers.push(channel);
+            DATABASE_CON.lock().unwrap().update_profile(Profile_Channel_Select::by_ID(self.id), ProfileUpdate::update_servers(self.servers_to_string())).unwrap();
         }
     }
+
+    pub fn contacts_to_string(&self) -> String {
+        serde_json::to_string(&self.contacts).unwrap()
+    }
+
+    pub fn servers_to_string(&self) -> String {
+        serde_json::to_string(&self.servers).unwrap()
+    }
+
 }
 
 
