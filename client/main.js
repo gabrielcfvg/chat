@@ -67,7 +67,7 @@ var dados = {
 }
 
 let login_ready, login_res, login_err;
-function MessageFunction();
+function MessageFunction() {};
 
 ipcMain.on('login', login);
 ipcMain.on("send_message", send_message);
