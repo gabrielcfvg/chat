@@ -1,6 +1,5 @@
-const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron")
-
-const { savePreferences, backupMessages, viewed } = require('./functions')
+const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron");
+const { savePreferences, backupMessages, viewed } = require('./functions');
 
 const storage = require('electron-json-storage')
 app.whenReady().then(() => {
@@ -68,23 +67,12 @@ var dados = {
     operation: 0
 }
 
-let login_ready = false;
-let login_res;
-let login_err = false
-let function_received = false;
+let login_ready, login_res, login_err;
 function MessageFunction() {};
 
 ipcMain.on('login', login);
 ipcMain.on("send_message", send_message);
-ipcMain.on("MessageFunction", (event, arg) => {
-
-    MessageFunction = function(message) {
-        arg(message);
-    };
-    function_received = true;
-});
-
-function connect() {
+ipcMain.on("MessageFunction", (event, arg) => MessageFunction = arg);
 
     let new_socket = new net.Socket;
     new_socket.connect({ host: IP, port: PORTA }, () => {
@@ -106,107 +94,87 @@ function connect() {
         }
     });
 
-    return new_socket;
-}
+socket.connect({ host: IP, port: PORTA }, () => {
+    console.log("conectado com sucesso!!!");
+    //socket.write('{"type": 2}');
+});
 
-function sleep(ms) {
-    return new Promise(resolve => {
-        setTimeout(() => resolve(true), ms);
-    });
-}
+socket.on('error', () => {
+    login_err = true;
+});
+
+socket.on('data', data => {
+    if (login_status) socket_client(data);
+    else              socket_login(data);
+});
+
+var sleep = ms => new Promise(resolve => setTimeout(() => resolve(true), ms));
 
 async function login(event, arg) {
 
-    if (login_status) {
-        event.returnValue = 666;
-        return
-    }
+    if (login_status) { event.returnValue = 666; return; }
 
     dados = {...dados, ...arg};
 
     login_ready = false;
     socket.write('{"type": 2}');
 
-    while ( !login_ready && await sleep(100) )
-        console.log("ciclo de sleep") // debug
+    while ( !login_ready && await sleep(100) ) console.log("ciclo de sleep") // debug
 
     event.returnValue = login_res;
 }
 
 function socket_login(data) {
-    if (!data){
-        return;
-    }
+    if (!data) return;
 
     let pacote = JSON.parse(data.toString());
 
-    if (!login_status) {
+    if (pacote.type === 0) {
 
-        if (pacote.type === 0) {
+        let chave = new Buffer.from(pacote.content, "base64").toString(); // decodificação da chave pública de base64 pra bytes
 
-            // decodificação da chave pública de bae64 pra bytes
-            let chave = new Buffer.from(pacote.content, "base64").toString();
-            
-            // criação do pacote a ser enviado para o servidor
-            let saida = {
-                type: 0,
-                content: dados
-            };
+        let saida = encoder.encode(JSON.stringify({
+            type: 0,
+            content: dados
+        })); // pacote a ser enviado ao servidor
 
-            // transformação do pacote em uma string JSON
-            saida = encoder.encode(JSON.stringify(saida));
+        socket.write(crypto.publicEncrypt({
+            key: chave,
+            padding: crypto.constants.RSA_PKCS1_PADDING
+        }, saida)); // envio do pacote para o servidor
 
-            // envio do pacote para o servidor
-            socket.write(crypto.publicEncrypt({ key: chave, padding: crypto.constants.RSA_PKCS1_PADDING }, saida));
+    } else if (pacote.type === 1) {
 
+        if (pacote.content === 0) {
+            login_status = true;
+            socket.write('{"type": 20, "content": 1}')
         }
-        else if (pacote.type === 1) {
 
-                if (pacote.content === 0) {
-                    login_status = true;
-                    socket.write('{"type": 20, "content": 1}')
-                }
+        login_ready = true;
+        login_res = pacote.content;
 
-                login_ready = true;
-                login_res = pacote.content;
+        console.log(">>>" + pacote.content.toString());
 
-            
-            console.log(">>>" + pacote.content.toString());
-
-        }
     }
 }
 
 function socket_client(data) {
 
     console.log("pacote recebido");
-    if (!data) {
-        return;
-    }
+    if (!data) return; 
 
     for(raw_package of data.toString().split("|")) {
 
-        if (!raw_package) {
-            continue;
-        }
+        if (!raw_package) continue;
 
         let package = JSON.parse(raw_package);
 
         switch (package.type) {
-
             case 10: {
-                
-                let new_message = {
-                    autor: package.content.autor,
-                    message: package.content.message
-                };
-    
-                if (function_received) {
-                    MessageFunction(new_message);
-                }
+                MessageFunction(package.content);
 
-                console.log(new_message.autor);
-                console.log(new_message.message);
+                console.log(package.content.autor);
+                console.log(package.content.message);
                 console.log("-----------------------");
             }
         }
@@ -215,24 +183,10 @@ function socket_client(data) {
 
 function send_message(event, arg) {
 
-    if (!login_status) {
-        return;
-    }
+    if (!login_status) return;
 
-    let package = {
-        
+    socket.write(JSON.stringify({
         type: 10,
-        content: {
-            channel: arg.channel,
-            message: arg.message,
-        }
-    }
-
-    socket.write(JSON.stringify(package));
+        content: arg
+    }));
 }
-
-function reconnect() {
-    socket = connect()
-}
-
-socket = connect();

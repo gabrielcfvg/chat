@@ -3,3 +3,5 @@ node_modules/
 *.dll
 dist/
 target/
+user.json
+configs.json
