@@ -73,7 +73,10 @@ function MessageFunction() {};
 ipcMain.on('login', login);
 ipcMain.on("send_message", send_message);
 ipcMain.on("MessageFunction", (event, arg) => MessageFunction = arg);
+ipcMain.on("reconnect", (event, args) => reconnect())
 
+
+function connect() {
     let new_socket = new net.Socket;
     new_socket.connect({ host: IP, port: PORTA }, () => {
         console.log("conectado com sucesso!!!");
@@ -93,20 +96,9 @@ ipcMain.on("MessageFunction", (event, arg) => MessageFunction = arg);
             socket_client(data);
         }
     });
+    return new_socket;
+}
 
-socket.connect({ host: IP, port: PORTA }, () => {
-    console.log("conectado com sucesso!!!");
-    //socket.write('{"type": 2}');
-});
-
-socket.on('error', () => {
-    login_err = true;
-});
-
-socket.on('data', data => {
-    if (login_status) socket_client(data);
-    else              socket_login(data);
-});
 
 var sleep = ms => new Promise(resolve => setTimeout(() => resolve(true), ms));
 
@@ -190,3 +182,10 @@ function send_message(event, arg) {
         content: arg
     }));
 }
+
+function reconnect() {
+    socket = connect();
+}
+
+
+socket = connect();
