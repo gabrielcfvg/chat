@@ -109,35 +109,32 @@ function socket_login(data) {
 
     let pacote = JSON.parse(data.toString());
 
-    if (!login_status) {
+    if (pacote.type === 0) {
 
-        if (pacote.type === 0) {
+        let chave = new Buffer.from(pacote.content, "base64").toString(); // decodificação da chave pública de base64 pra bytes
 
-            let chave = new Buffer.from(pacote.content, "base64").toString(); // decodificação da chave pública de base64 pra bytes
+        let saida = encoder.encode(JSON.stringify({
+            type: 0,
+            content: dados
+        })); // pacote a ser enviado ao servidor
 
-            let saida = encoder.encode(JSON.stringify({
-                type: 0,
-                content: dados
-            })); // pacote a ser enviado ao servidor
+        socket.write(crypto.publicEncrypt({
+            key: chave,
+            padding: crypto.constants.RSA_PKCS1_PADDING
+        }, saida)); // envio do pacote para o servidor
 
-            socket.write(crypto.publicEncrypt({
-                key: chave,
-                padding: crypto.constants.RSA_PKCS1_PADDING
-            }, saida)); // envio do pacote para o servidor
+    } else if (pacote.type === 1) {
 
-        } else if (pacote.type === 1) {
-
-            if (pacote.content === 0) {
-                login_status = true;
-                socket.write('{"type": 20, "content": 1}')
-            }
-
-            login_ready = true;
-            login_res = pacote.content;
-
-            console.log(">>>" + pacote.content.toString());
-
+        if (pacote.content === 0) {
+            login_status = true;
+            socket.write('{"type": 20, "content": 1}')
         }
+
+        login_ready = true;
+        login_res = pacote.content;
+
+        console.log(">>>" + pacote.content.toString());
+
     }
 }
 
@@ -170,9 +167,6 @@ function send_message(event, arg) {
 
     socket.write(JSON.stringify({
         type: 10,
-        content: {
-            channel: arg.channel,
-            message: arg.message,
-        }
+        content: arg
     }));
 }
