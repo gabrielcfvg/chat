@@ -53,11 +53,12 @@ ipcMain.on('viewed', viewed)
 
 const net = require("net");
 const crypto = require("crypto");
+const { Socket } = require("dgram")
 
 const encoder = new TextEncoder();
 
 let login_status = false;
-let socket = new net.Socket();
+let socket;
 
 const PORTA = 1234;
 const IP = "127.0.0.1";
@@ -83,30 +84,30 @@ ipcMain.on("MessageFunction", (event, arg) => {
     function_received = true;
 });
 
+function connect() {
 
+    let new_socket = new net.Socket;
+    new_socket.connect({ host: IP, port: PORTA }, () => {
+        console.log("conectado com sucesso!!!");
+        //socket.write('{"type": 2}');
+    });
+    
+    new_socket.on('error', () => {
+        login_err = true;
+    });
+    
+    new_socket.on('data', data => {
+    
+        if (!login_status) {
+            socket_login(data);
+        }
+        else {
+            socket_client(data);
+        }
+    });
 
-socket.connect({ host: IP, port: PORTA }, () => {
-    console.log("conectado com sucesso!!!");
-    //socket.write('{"type": 2}');
-});
-
-socket.on('error', () => {
-    login_err = true;
-});
-
-socket.on('data', data => {
-
-    if (!login_status) {
-        socket_login(data);
-    }
-    else {
-        socket_client(data);
-    }
-});
-
-
-
-
+    return new_socket;
+}
 
 function sleep(ms) {
     return new Promise(resolve => {
@@ -229,3 +230,9 @@ function send_message(event, arg) {
 
     socket.write(JSON.stringify(package));
 }
+
+function reconnect() {
+    socket = connect()
+}
+
+socket = connect();
