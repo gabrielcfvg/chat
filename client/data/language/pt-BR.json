@@ -17,5 +17,9 @@
     "language": "Idioma",
     "langonly": "Somente pt-BR e en-US",
     "savechanges": "Salvar mudanças",
-    "returndefaults": "Voltar às configurações padrões"
+    "returndefaults": "Voltar às configurações padrões",
+    "donthaveaccount": "Não tem uma conta? ",
+    "signin": "Registre-se",
+    "haveaccount": "Já tem uma conta? ",
+    "login": "Entre"
 }

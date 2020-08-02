@@ -18,6 +18,7 @@ function labelBlur(id) {
 }
 
 function logIn() {
+    ipcRenderer.sendSync("reconnect");
     if (!passwordMatch) {
         error[2].innerHTML = "Senhas não coincidem";
         error[2].classList.add("visible");

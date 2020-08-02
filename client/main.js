@@ -81,7 +81,10 @@ async function MessageFunction(message) {
 ipcMain.on('login', login);
 ipcMain.on("send_message", send_message);
 ipcMain.on("MessageFunction", (event, arg) => MessageFunction = arg);
-ipcMain.on("reconnect", (event, args) => reconnect())
+ipcMain.on("reconnect", (event, args) => {
+    reconnect();
+    event.returnValue = true;
+});
 
 
 function connect() {
@@ -104,6 +107,7 @@ function connect() {
             socket_client(data);
         }
     });
+    login_status = false;
     return new_socket;
 }
 

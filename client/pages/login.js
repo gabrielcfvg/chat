@@ -16,6 +16,7 @@ function labelBlur(id) {
 }
 
 function logIn() {
+    ipcRenderer.sendSync("reconnect");
     if (!(fs.existsSync("data/user.json"))) {
         fs.open("data/user.json", "w", function() {});
     }

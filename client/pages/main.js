@@ -9,6 +9,7 @@ var alternateIcon = document.getElementById("alternateIcon");
 var addServer = document.getElementById("addServer");
 var leftMenuDiv = document.getElementById("leftMenuDiv");
 var chatBox = document.getElementById("chatBox");
+var msgText = document.getElementById("messageInput");
 var time1 = Math.round(
   getComputedStyle(document.documentElement).getPropertyValue("--t1").slice(0, -2)
 );
@@ -39,8 +40,11 @@ function openActive() {
     rightSide.innerHTML = `<h1 class="ns text-soon"></h1><h2 class="ns text-soon1"></h2>`;
   else if (activeType === "config") rightSide.innerHTML = configs;
   else if (activeType === "server") {
-    rightSide.innerHTML = `<div id="chatBox"></div>`;
+    rightSide.innerHTML = `
+    <div id="chatBox"></div>
+    <div id="msgBox"><textarea id="messageInput"></textarea><div id="sendMessage" onclick="sendMsg()"><img src="tmp/send.svg"></div></div>`;
     chatBox = document.getElementById("chatBox");
+    msgText = document.getElementById("messageInput");
     showMessagesInChatBox(active);
   } else rightSide.innerHTML = "";
 }
@@ -296,31 +300,7 @@ function resetSettings() {
 
 // MENSAGENS
 
-var messages = [
-  {
-    autor: "Arthur Bacci",
-    channel: {
-      name: "Servidor maneiro",
-      id: "eu sou uma hash",
-    },
-    message: "Eae",
-    timestamp: 12391238
-  },
-  {
-    autor: "Arthur Bacci 2",
-    channel: {
-      name: "Servidor maneiro",
-      id: "eu sou uma hash",
-    },
-    message: "Olá",
-    timestamp: 12391237123
-  },
-];
-
-messages = messages.map(item => {
-  item.timestamp = new Date(item.timestamp * 1000);
-  return item;
-});
+var messages = [];
 
 async function showMessagesInChatBox() {
   while (!chatBox) await new Promise(r => setTimeout(r, 100));
@@ -347,9 +327,33 @@ ipcRenderer.on("MessageFunction", (event, msg) => {
   showMessagesInChatBox();
 });
 
+function sendMsg() {
+  ipcRenderer.send("send_message", {
+    message: msgText.value,
+    channel: active
+  });
+}
+
+async function login() {
+  ipcRenderer.sendSync("reconnect");
+  if (fs.existsSync("data/user.json")) {
+    var { name, password } = JSON.parse(fs.readFileSync("data/user.json"));
+    var returnValue = ipcRenderer.sendSync("login", {
+      name: name,
+      password: password,
+      operation: 0
+    });
+    console.log(returnValue);
+    if (returnValue != 0)
+      location.href = "login.html";
+  } else
+    location.href = "login.html";
+}
+
 var listing = 0;
 listServers();
 pushItems();
 writeText();
 listSettings();
 listColors();
+login();

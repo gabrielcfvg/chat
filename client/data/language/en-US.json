@@ -17,5 +17,9 @@
     "language": "Language",
     "langonly": "Only en-US and pt-BR",
     "savechanges": "Save changes",
-    "returndefaults": "Return to the default settings"
+    "returndefaults": "Return to the default settings",
+    "donthaveaccount": "Don`t have an account? ",
+    "signin": "Sign-in",
+    "haveaccount": "Already have an account? ",
+    "login": "Log-in"
 }
