@@ -2,8 +2,9 @@ const { app, BrowserWindow, ipcMain, globalShortcut } = require("electron");
 const { savePreferences, backupMessages, viewed } = require('./functions');
 
 const storage = require('electron-json-storage')
+var win;
 app.whenReady().then(() => {
-    const win = new BrowserWindow({
+    win = new BrowserWindow({
         width: 800, // Largura da tela
         height: 600, // Altura da tela
         webPreferences: {
@@ -14,7 +15,7 @@ app.whenReady().then(() => {
         minWidth: 300
     })
     win.loadFile("pages/main.html") // Carrega a página
-    win.removeMenu() // Tira o menu superior
+    // win.removeMenu() // Tira o menu superior
 
     globalShortcut.register('CommandOrControl+B', backupMessages) // Faz backup com Ctrl+B
 }) // Promessa de criação da tela
@@ -32,6 +33,8 @@ app.on('activate', () => {
         createWindow()
     }
 })
+
+
 
 // IPC 
 
@@ -68,7 +71,12 @@ var dados = {
 }
 
 let login_ready, login_res, login_err;
-function MessageFunction() {};
+async function MessageFunction(message) {
+    while (!win) await new Promise(r => setTimeout(r, 100));
+    win.webContents.on('did-finish-load', function() {
+        win.webContents.send("MessageFunction", message);
+    });
+};
 
 ipcMain.on('login', login);
 ipcMain.on("send_message", send_message);
