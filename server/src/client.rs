@@ -105,7 +105,8 @@ pub fn login(conn: &mut TcpStream, _addr: &mut SocketAddr) -> Result<Profile, Bo
                             name: u_nome.to_string(), 
                             hash: hash_senha, 
                             servers: vec![],
-                            contacts: vec![]})?;
+                            contacts: vec![]
+                        })?;
                         
                         drop(tmp_lock);
                         
@@ -183,7 +184,7 @@ pub fn client(mut conn: TcpStream, addr: SocketAddr, id: u32, name: String) -> R
                         
                         // verifica se o canal existe no banco de dados,
                         // caso exista, ele é carregado e inserido na memoria, e a mensagem é enviada
-                        match Channel::channel_from_database(channel) {
+                        match Channel::channel_from_database(Profile_Channel_Select::by_ID(channel)) {
                             Some(ch) => {
                                 CHANNELS.write()?.insert(channel, Mutex::new(ch));
                                 CHANNELS.read()?.get(&channel).unwrap().lock().unwrap().message_broadcast(id.clone(), name.clone(), message.to_string()).unwrap();
@@ -195,8 +196,7 @@ pub fn client(mut conn: TcpStream, addr: SocketAddr, id: u32, name: String) -> R
                     }
 
                     println!(">>>>>>>> tempo broadcast: {}", tm.elapsed().as_micros()); // debug
-                }
-                
+                }         
                 
                 // protocolo para entrada de um client em determinado canal
                 20 => {
@@ -214,7 +214,7 @@ pub fn client(mut conn: TcpStream, addr: SocketAddr, id: u32, name: String) -> R
 
                         // verifica se o canal existe no banco de dados,
                         // caso exista, ele é carregado e inserido na memoria, e o membro é adicionado
-                        match Channel::channel_from_database(channel) {
+                        match Channel::channel_from_database(Profile_Channel_Select::by_ID(channel)) {
                             Some(ch) => {
                                 CHANNELS.write()?.insert(channel, Mutex::new(ch));
                                 CHANNELS.read()?.get(&channel).unwrap().lock().unwrap().add_member(id.clone());
@@ -228,6 +228,60 @@ pub fn client(mut conn: TcpStream, addr: SocketAddr, id: u32, name: String) -> R
                     CLIENTS.read().unwrap().get(&id).unwrap().lock().unwrap().profile.add_channel(channel);
                 }
                 
+                // protocolo de alteração de imagem de perfil
+                30 => {
+                    
+                    let size = pacote["content"]["size"].as_u64().unwrap() as usize;
+                    let format: &str = pacote["content"]["format"].as_str().unwrap();
+                    std::fs::File::create(format!("./images/profile_{}.{}", id, format))?.write_all(&receive_data(&mut conn, size)?)?;
+                    conn.write(&json_to_bytes(json![{"type": 30, "content": 0}]))?;
+
+
+
+                }
+
+                // protocolo para requisição de imagem de perfil
+                31 => {
+
+                    let profile = pacote["content"].as_str().unwrap();
+
+                    let search =  DATABASE_CON.lock()?.select_profile(Profile_Channel_Select::by_name(profile.to_string())).unwrap();
+
+                    if let Some(pro) = search {
+                        let data = pro.get_profile_image();
+
+                        if let Some(data) = data {
+
+                            let (img, fmt) = data;
+
+                            let pacote_img = json_to_bytes(json![{"type": 31, "content": base64::encode_block(&img)}]);
+                            conn.write(&json_to_bytes(json![{"type": 31, "content": {"size": pacote_img.len(), "format": fmt}}]))?;
+
+                            mem = [0; 2048];
+                            conn.read(&mut mem)?;
+                            let pacote_2 = bytes_to_string(&mem);
+                            let pacote_2: Value = serde_json::from_str(&pacote_2).unwrap();
+
+                            if pacote_2["content"] != 0 {
+                                continue;
+                            }
+
+                            conn.write(&pacote_img)?;
+
+                        }
+                        else {
+                            // usuário não possue foto de perfil
+                            conn.write(&json_to_bytes(json![{"type": 31, "content": 2}]))?;
+                        }
+
+                    }
+                    else {
+                        // usuário não existente
+                        conn.write(&json_to_bytes(json![{"type": 31, "content": 1}]))?;
+                    }
+
+
+                }
                 _ => {}
             }
         }
@@ -245,4 +299,18 @@ pub fn json_to_string(data: Value) -> String {
 }
 pub fn json_to_bytes(data: Value) -> Vec<u8> {
     return json_to_string(data).as_bytes().to_vec();
+}
+
+pub fn receive_data(conn: &mut TcpStream, size: usize) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+
+    conn.write(r#"{"type": 30, "content": 0}"#.as_bytes())?;
+    let mut mem = vec![0u8; size+2000];
+
+    conn.read(&mut mem)?;
+
+    let pacote: Value = serde_json::from_str(String::from_utf8_lossy(&mem).trim_matches('\0').trim())?;
+    let data = base64::decode_block(pacote["content"].as_str().unwrap())?;
+
+    Ok(data)
+
 }

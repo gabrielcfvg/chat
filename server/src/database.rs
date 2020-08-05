@@ -2,7 +2,7 @@ use std::path::Path;
 use std::io::ErrorKind;
 
 use crate::profile::Profile;
-use crate::channel::Channel;
+use crate::channel::{RawChannel};
 
 use rusqlite;
 
@@ -26,7 +26,7 @@ pub enum ChannelUpdate {
 
 #[allow(non_camel_case_types)]
 pub struct Database_API {
-    conexao: rusqlite::Connection
+    pub conexao: rusqlite::Connection
 }
 
 impl Database_API {
@@ -209,7 +209,7 @@ impl Database_API {
 
 
 
-    pub fn select_channel(&mut self, arg: Profile_Channel_Select) -> rusqlite::Result<Option<Channel>> {
+    pub fn select_channel(&mut self, arg: Profile_Channel_Select) -> rusqlite::Result<Option<RawChannel>> {
 
         let query: String;
 
@@ -241,10 +241,10 @@ impl Database_API {
 
         let mut prepate = prepate.unwrap();
         let res = prepate.query_map(rusqlite::params![], |row| {
-            Ok(Channel::new_from_database(&row)?)
+            Ok(RawChannel::channel_from_database(&row)?)
         });
 
-        let channels: Vec<Channel> = res.unwrap().map(|x| x.unwrap()).collect();
+        let channels: Vec<RawChannel> = res.unwrap().map(|x| x.unwrap()).collect();
 
         if channels.len() >= 1 {
             return Ok(Some(channels[0].clone()));
@@ -255,7 +255,7 @@ impl Database_API {
         
     }
 
-    pub fn insert_channel(&mut self, channel: Channel) -> rusqlite::Result<()> {
+    pub fn insert_channel(&mut self, channel: RawChannel) -> rusqlite::Result<()> {
 
         let members = serde_json::to_string(&channel.members).unwrap();
 

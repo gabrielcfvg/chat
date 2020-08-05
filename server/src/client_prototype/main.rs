@@ -85,6 +85,7 @@ fn receiver(mut socket: TcpStream, name: String, senha: String, mut operation: u
             else if operation == 1 && pacote["content"].as_u64().expect("2") == 3 {
                 operation = 0;
             }
+            #[allow(deprecated)]
             std::thread::sleep_ms(1000)
         }
 
@@ -94,6 +95,35 @@ fn receiver(mut socket: TcpStream, name: String, senha: String, mut operation: u
     }
 
     println!("conectado com sucesso como {}!!!", name);
+
+    /*
+    println!("inicio");
+    
+    let mut file = std::fs::File::open("teste.png").unwrap();
+    let size = file.metadata().unwrap().len() as usize;
+
+    let mut vecmem = vec![0u8; size];
+    file.read(&mut vecmem).unwrap();
+    let pacote_img = json![{"type": 2, "content": base64::encode_block(&vecmem)}].to_string();
+
+    let pacote = json_to_string(json![{"type": 30, "format": "png", "content": pacote_img.len()}]);
+    println!("1° pacote: {}", pacote);
+    
+    socket.write(pacote.as_bytes()).unwrap();
+    
+    vecmem = vec![0u8; 1024];
+    socket.read(&mut vecmem)?;
+    println!("data: {}", bytes_to_string(&vecmem));
+    
+    socket.write(pacote_img.as_bytes()).unwrap();
+    
+    vecmem = vec![0u8; 1024];
+    socket.read(&mut vecmem)?;
+    println!("data: {}", bytes_to_string(&vecmem));
+
+    drop(vecmem);
+    
+    */
 
     socket.write(&json_to_bytes(json![{"type": 20, "content": 1}]))?;
     
@@ -153,7 +183,7 @@ fn main() {
     print!("operação: ");
     std::io::stdout().flush().unwrap();
     std::io::stdin().read_line(&mut operation).unwrap();
-    let mut operation: u32 = operation.trim().parse().unwrap();
+    let operation: u32 = operation.trim().parse().unwrap();
 
 
     //std::process::exit(0);
@@ -171,7 +201,7 @@ fn main() {
 
     });
 
-    
+
     loop {
 
         let mut message: String = String::new();

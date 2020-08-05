@@ -6,6 +6,7 @@ mod database;
 mod channel;
 mod profile;
 mod time;
+mod message;
 
 use client::{client, login};
 
@@ -37,6 +38,16 @@ lazy_static!{
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
+    if !(std::path::Path::new("./channels_data").exists()) {
+        std::fs::create_dir("./channels_data").unwrap();
+    }
+
+    if !(std::path::Path::new("./images").exists()) {
+        std::fs::create_dir("./images").unwrap();
+    }
+
+
+
     // inicialização dos válores estáticos
 
     initialize(&DATABASE_CON);
@@ -49,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("client array ready!");
 
     initialize(&CHANNELS);
-    match channel::Channel::channel_from_database(1) {
+    match channel::Channel::channel_from_database(database::Profile_Channel_Select::by_ID(1)) {
         Some(ch) => {
             println!("canal já existente");
             CHANNELS.write().unwrap().insert(ch.id, Mutex::new(ch));
@@ -57,15 +68,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         None => {
             println!("criando canal");
-            let mut tmp_lock = DATABASE_CON.lock().unwrap();
-            tmp_lock.insert_channel(channel::Channel {
-                id: 666,
-                name: String::from("teste"),
-                members: vec![]
-            }).unwrap();
-            
-            drop(tmp_lock);
-            let ch = channel::Channel::channel_from_database(1).unwrap();
+            channel::Channel::new(String::from("teste"), None).unwrap();
+            let ch = channel::Channel::channel_from_database(database::Profile_Channel_Select::by_ID(1)).unwrap();
             
             CHANNELS.write().unwrap().insert(ch.id, Mutex::new(ch));
         }

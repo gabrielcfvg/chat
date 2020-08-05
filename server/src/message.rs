@@ -1,44 +1,22 @@
-use crate::channel::Channel;
 
 pub struct Message {
     pub id: u32,
     pub autor: u32,
-    pub content: String,
-    pub src: u32
+    pub timestamp: u32,
+    pub message: String
 }
 
 impl Message {
 
-    pub fn new(channel: &Channel, autor: u32, content: String, src: u32) -> Self {
+    pub fn message_from_row(row: &rusqlite::Row) -> rusqlite::Result<Self> {
 
-        fn get_next_id(channel: &Channel) -> u32 {
-            match channel.messages.last() {
-                Some(message) => {
-                    return message.id+1;
-                }
-                None => {
-                    return 0;
-                }
+        Ok(
+            Message {
+                id: row.get(0)?,
+                autor: row.get(1)?,
+                timestamp: row.get(2)?,
+                message: row.get(3)?
             }
-        }
-
-        let id = get_next_id(channel);
-
-        Message{
-            id,
-            autor,
-            content,
-            src
-        }
-    }
-
-    pub fn edit(&mut self, new_content: String) {
-        self.content = new_content;
-    }
-}
-
-impl PartialEq for Message {
-    fn eq(&self, other: &Self) -> bool {
-        self.id == other.id
+        )
     }
 }

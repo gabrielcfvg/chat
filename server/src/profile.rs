@@ -2,6 +2,7 @@ use serde_json::{Value};
 use std::net::{TcpStream, SocketAddr};
 use crate::database::{Profile_Channel_Select, ProfileUpdate};
 use crate::{DATABASE_CON};
+use std::io::{Read};
 
 #[derive(Debug, Clone)]
 pub struct Profile {
@@ -10,7 +11,7 @@ pub struct Profile {
     pub name: String,
     pub hash: String,
     pub servers: Vec<u32>,
-    pub contacts: Vec<u32>
+    pub contacts: Vec<u32>,
 }
 
 impl Profile {
@@ -26,13 +27,13 @@ impl Profile {
         let contacts: Value = serde_json::from_str(contacts.as_str()).unwrap();
         let contacts: Vec<u32> = contacts.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as u32).collect();
         
-        
+
         Ok(Profile {
             id: row.get(0)?,
             name: row.get(1)?,
             hash: row.get(2)?,
             servers,
-            contacts
+            contacts,
         })
     }
     
@@ -51,6 +52,30 @@ impl Profile {
         serde_json::to_string(&self.servers).unwrap()
     }
 
+    pub fn get_profile_image(&self) -> Option<(Vec<u8>, String)> {
+
+        let search = format!("profile_{}", self.id);
+
+        if let Ok(entries) = std::fs::read_dir("./images") {
+            for entry in entries {
+                if let Ok(entry) = entry {
+                    if entry.file_name().into_string().unwrap().starts_with(&search) {
+                        let name = entry.file_name().into_string().unwrap();
+                        let ext = name.split(".").last().unwrap().to_string();
+
+                        let mut file = std::fs::File::open(name).unwrap();
+                        let mut mem = vec![0u8; file.metadata().unwrap().len() as usize];
+                        file.read(&mut mem).unwrap();
+                        
+                        return Some((mem, ext));
+                    }
+                }
+            }
+        }
+
+        None
+    }
+
 }
 
 
@@ -59,6 +84,7 @@ pub struct NetProfile {
     pub socket: TcpStream,
     pub addr: SocketAddr
 }
+
 impl NetProfile {
 
     pub fn from_profile(profile: Profile, stream: TcpStream, addr: SocketAddr) -> Self {
